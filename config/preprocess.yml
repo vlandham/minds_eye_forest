@@ -1,2 +1,4 @@
-source_dir: sample_in/
-output_dir: sample_out/
+head1:
+  input_dir: test/sample_in
+  output_dir: test/sample_out
+
