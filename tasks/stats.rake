@@ -19,7 +19,6 @@ class Magick::ImageList
       min = value < min ? value : min
     end
   end
-  
 end
 
 namespace :stats do
