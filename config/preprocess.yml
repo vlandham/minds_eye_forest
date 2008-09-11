@@ -1,4 +1,8 @@
 head1:
   input_dir: test/sample_in
   output_dir: test/sample_out
-
+  size:
+    w: 50
+    h: 60
+  
+  
