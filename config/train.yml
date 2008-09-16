@@ -1,7 +1,9 @@
 head1:
   samples:
     test/sample_out: head1
-  
+  pixel_info: I
+  tables: test/datasets
+
 
 body1:
   samples:
