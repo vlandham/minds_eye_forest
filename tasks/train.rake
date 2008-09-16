@@ -77,7 +77,7 @@ namespace :train do
     puts "Creating script folder if necessary: #{script_folder}"
     mkdir_p script_folder
     mkdir_p tree_folder
-    @script_name = "#{script_folder}/#{GROUP}_train.R"
+    @script_name = "#{script_folder}/#{tree_name}_train.R"
     puts "Creating script: #{@script_name}"
     
     # if # of tress or # of attributes to look at are given, set that up here.

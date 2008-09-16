@@ -2,7 +2,7 @@ head1:
   samples:
     test/sample_out: head1
   pixel_info: I
-  tree: test/test/trees
+  tree: test/trees
   tables: test/test/datasets
   script: test/test/scripts
 
