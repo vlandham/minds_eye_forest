@@ -30,15 +30,17 @@ namespace :train do
     end
   end
   
-  desc "vectorizes the image data into one long vector. Currently a destructive operation on @images"
+  desc "vectorizes the image data into one long vector."
   task :vectorize => :get_images do
     @raw_data = Hash.new
     @images.each do |target_type, photo_array|
+      vector_array = Array.new
       photo_array.each do |photo|
-        # !!! modifying the photo in images to be an array.
-        photo = photo.export_pixels(0,0,photo.columns,photo.rows,CONFIG['pixel_info'])
-        photo.map! {|pixel| pixel.to_f / QuantumRange.to_f}
+        temp_photo = photo.export_pixels(0,0,photo.columns,photo.rows,CONFIG['pixel_info'])
+        temp_photo.map! {|pixel| pixel.to_f / QuantumRange.to_f}
+        vector_array << temp_photo
       end
+      @raw_data[target_type] = vector_array
     end
   end
   
@@ -46,21 +48,57 @@ namespace :train do
   task :create_tables => :vectorize do
     output_dir = CONFIG['tables']
     throw "Error: #{output_dir} does not exist" unless File.directory?(output_dir)
-    data_set = File.new("#{output_dir}/#{GROUP}-testset.R", "w")
-    class_set = File.new("#{output_dir}/#{GROUP}-classset.R", "w")
-    
-    @images.each do |target_type, vector_array|
+    @data_set_name = "#{output_dir}/#{GROUP}-testset.dat"
+    @class_set_name = "#{output_dir}/#{GROUP}-classset.dat"
+    data_set = File.new(@data_set_name, "w")
+    class_set = File.new(@class_set_name, "w")
+    @cols = nil
+    @rows = 0
+    @raw_data.each do |target_type, vector_array|
+      @rows += vector_array.size
       vector_array.each do |vector|
-        data_set << vector.join(" ")
-        class_set << target_type
+        @cols ||= vector.size
+        data_set << vector.join(" ") << "\n"
+        class_set << '"'<< target_type << '"' << "\n"
       end
+      
     end
     
     data_set.close
     class_set.close
   end
   
+  desc "write the R script to train with this dataset"
+  task :write_r_script => :create_tables do
+    script_folder = CONFIG['script']
+    puts "Creating script folder if necessary: #{script_folder}"
+    mkdir_p script_folder
+    @script_name = "#{script_folder}/#{GROUP}_train.R"
+    puts "Creating script: #{@script_name}"
+    
+    tree_string = CONFIG['trees'] ? ", ntree=#{CONFIG['trees']}" :  ", ntree=100"
+    tries_string = CONFIG['tries'] ? ", mtry=#{CONFIG['tries']}" : ""
+    
+    script_file = File.open(@script_name, 'w') do |file|
+      file << "library(\'randomForest\')\n"
+      file << "training_set = matrix(scan(\'#{File.expand_path(@data_set_name)}\', n=#{@rows*@cols}),"
+      file << " #{@rows}, #{@cols}, byrow = TRUE)\n"
+      file << "class_set = matrix(scan(file=\'#{File.expand_path(@class_set_name)}\', what=\"\", n=#{@rows}),"
+      file << " #{@rows}, 1, byrow = TRUE)\n"
+      file << "class_set_factor <- factor(class_set)\n"
+      file << "#{GROUP}_rf <- randomForest(training_set, class_set_factor#{tree_string}#{tries_string})\n"
+      file << "save(#{GROUP}_rf, file=\'#{script_folder}/#{GROUP}_rf\')\n"
+    end
+  end
+  
+  desc "calls R in batch mode with the script created by this run"
+  task :train => :write_r_script do 
+    puts "running script in R"
+    `r CMD BATCH #{File.expand_path(@script_name)} #{File.expand_path(@script_name)}out`
+  end
+  
+  
   desc "chains the processing steps together to create a dataset from folders of images and train the RF"
-  task :rf => [:set_options, :get_images, :vectorize, :create_tables]
+  task :rf => [:set_options, :get_images, :vectorize, :create_tables, :write_r_script, :train]
   
 end
