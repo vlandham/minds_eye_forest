@@ -1,5 +1,8 @@
 namespace :train do
   
+  desc "Chains the processing steps together to create a dataset from folders of images and train the RF"
+  task :rf => [:set_options, :get_images, :vectorize, :create_tables, :write_r_script, :train]
+  
   desc "Sets where the folder of images to preprocess is, destination and preprocessing requirements"
   task :set_options do
     puts "Reading configuration for #{GROUP}"
@@ -70,9 +73,12 @@ namespace :train do
   
   desc "write the R script to train with this dataset"
   task :write_r_script => :create_tables do
-    script_folder = CONFIG['script']
+    script_folder = CONFIG['script'] || "scripts"
+    tree_folder = CONFIG['tree'] || "trees"
+    tree_name = CONFIG['name'] || GROUP
     puts "Creating script folder if necessary: #{script_folder}"
     mkdir_p script_folder
+    mkdir_p tree_folder
     @script_name = "#{script_folder}/#{GROUP}_train.R"
     puts "Creating script: #{@script_name}"
     
@@ -86,8 +92,8 @@ namespace :train do
       file << "class_set = matrix(scan(file=\'#{File.expand_path(@class_set_name)}\', what=\"\", n=#{@rows}),"
       file << " #{@rows}, 1, byrow = TRUE)\n"
       file << "class_set_factor <- factor(class_set)\n"
-      file << "#{GROUP}_rf <- randomForest(training_set, class_set_factor#{tree_string}#{tries_string})\n"
-      file << "save(#{GROUP}_rf, file=\'#{script_folder}/#{GROUP}_rf\')\n"
+      file << "#{tree_name}_rf <- randomForest(training_set, class_set_factor#{tree_string}#{tries_string})\n"
+      file << "save(#{tree_name}_rf, file=\'#{File.expand_path(tree_folder)}/#{tree_name}.rf\')\n"
     end
   end
   
@@ -96,9 +102,5 @@ namespace :train do
     puts "running script in R"
     `r CMD BATCH #{File.expand_path(@script_name)} #{File.expand_path(@script_name)}out`
   end
-  
-  
-  desc "chains the processing steps together to create a dataset from folders of images and train the RF"
-  task :rf => [:set_options, :get_images, :vectorize, :create_tables, :write_r_script, :train]
   
 end
