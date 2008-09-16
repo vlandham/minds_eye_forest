@@ -8,7 +8,7 @@ namespace :test do
     puts "Reading configuration for #{GROUP}"
     CONFIG = YAML.load_file("#{File.dirname(__FILE__)}/../config/test.yml")[GROUP]
     throw "Error: no samples folder" unless CONFIG["samples"]  
-    throw "Error: no tree folder" unless CONFIG["tree"]  
+    throw "Error: no tree folder" unless CONFIG["forests"]  
     # create directory for the training datasets
     puts "creating directory structure for : #{CONFIG['tables']}"
     mkdir_p CONFIG['tables']
@@ -19,7 +19,7 @@ namespace :test do
   desc "Write R script to test a random forest"
   task :write_r_script => "train:create_tables" do
     script_folder = CONFIG['script'] || "scripts"
-    tree_folder = CONFIG['tree']
+    tree_folder = CONFIG['forests']
     
     tree_name = CONFIG['name'] || GROUP
     puts "Creating script folder if necessary: #{script_folder}"

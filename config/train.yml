@@ -4,7 +4,7 @@ head1:
   pixel_info: I
   tables: test/datasets
   script: test/scripts
-  tree: test/trees
+  forest: test/forests
   trees: 100
 
 
