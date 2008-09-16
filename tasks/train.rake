@@ -7,8 +7,7 @@ namespace :train do
   task :set_options do
     puts "Reading configuration for #{GROUP}"
     CONFIG = YAML.load_file("#{File.dirname(__FILE__)}/../config/train.yml")[GROUP]
-    throw "Error: no samples folder" unless CONFIG["samples"]
-    
+    throw "Error: no samples folder" unless CONFIG["samples"]  
     # create directory for the training datasets
     puts "creating directory structure for : #{CONFIG['tables']}"
     mkdir_p CONFIG['tables']
@@ -57,16 +56,15 @@ namespace :train do
     class_set = File.new(@class_set_name, "w")
     @cols = nil
     @rows = 0
+    
     @raw_data.each do |target_type, vector_array|
       @rows += vector_array.size
       vector_array.each do |vector|
         @cols ||= vector.size
         data_set << vector.join(" ") << "\n"
         class_set << '"'<< target_type << '"' << "\n"
-      end
-      
-    end
-    
+      end      
+    end  
     data_set.close
     class_set.close
   end
@@ -82,9 +80,11 @@ namespace :train do
     @script_name = "#{script_folder}/#{GROUP}_train.R"
     puts "Creating script: #{@script_name}"
     
+    # if # of tress or # of attributes to look at are given, set that up here.
     tree_string = CONFIG['trees'] ? ", ntree=#{CONFIG['trees']}" :  ", ntree=100"
     tries_string = CONFIG['tries'] ? ", mtry=#{CONFIG['tries']}" : ""
     
+    # Create the R script for this traingset / RF
     script_file = File.open(@script_name, 'w') do |file|
       file << "library(\'randomForest\')\n"
       file << "training_set = matrix(scan(\'#{File.expand_path(@data_set_name)}\', n=#{@rows*@cols}),"
