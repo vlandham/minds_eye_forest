@@ -16,7 +16,7 @@ namespace :train do
   end
   
   desc "Gets the images from the folders described in the configuration file"
-  task :get_images => :set_options do
+  task :get_images do
     require 'RMagick'
     include Magick
     @images = Hash.new
