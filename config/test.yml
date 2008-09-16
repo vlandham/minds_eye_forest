@@ -1,0 +1,11 @@
+head1:
+  samples:
+    test/sample_out: head1
+  pixel_info: I
+  tree: test/trees
+
+
+body1:
+  samples:
+    test/body1: body1
+  
