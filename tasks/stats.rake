@@ -23,6 +23,12 @@ end
 
 namespace :stats do
   
+  desc "Test to see how to add input arguments to a task"
+  task :check_args, :one, :two do |t,args|
+    puts "#{args.one}"
+    puts "#{args.two}"
+  end
+  
   task :report => [:get_photos, :avg_height, :avg_width, :max_height, :max_width, 
                    :min_height, :min_width, :size, :print_report]
   
