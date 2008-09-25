@@ -1,0 +1,7 @@
+images: test/classify/samples
+pixel_info: I
+forests: 
+  - test/forests/head1
+
+tables: test/classify/datasets
+script: test/classify/scripts

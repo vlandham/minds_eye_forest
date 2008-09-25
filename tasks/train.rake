@@ -9,6 +9,7 @@ namespace :train do
     CONFIG = YAML.load_file("#{File.dirname(__FILE__)}/../config/train.yml")[GROUP]
     throw "Error: no samples folder" unless CONFIG["samples"]  
     # create directory for the training datasets
+    throw "Error: no tables folder" unless CONFIG["tables"]
     puts "creating directory structure for : #{CONFIG['tables']}"
     mkdir_p CONFIG['tables']
     # samples is a hash with folder/name => classification_type

@@ -10,6 +10,7 @@ namespace :test do
     throw "Error: no samples folder" unless CONFIG["samples"]  
     throw "Error: no forest folder" unless CONFIG["forest"]  
     # create directory for the training datasets
+    throw "Error: no tables folder" unless CONFIG["tables"]
     puts "creating directory structure for : #{CONFIG['tables']}"
     mkdir_p CONFIG['tables']
     # samples is a hash with folder/name => classification_type
