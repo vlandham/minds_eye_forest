@@ -1,6 +1,9 @@
 namespace :common do
   # tasks that are common to multiple namespaces  
   
+  
+  # ASSUMES: @samples is a hash with folder name and target type
+  # RETURNS: @images folder containing the loaded images from the folders
   desc "Gets the images from the folders described in the configuration file"
   task :get_images do
     require 'RMagick'
