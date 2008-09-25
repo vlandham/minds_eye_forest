@@ -5,4 +5,10 @@ head1:
     w: 50
     h: 60
   
+negative_head1:
+  input_dir: test/negative_in
+  output_dir: test/negative_out
+  size:
+    w: 50
+    h: 60
   

@@ -72,7 +72,7 @@ namespace :train do
   desc "write the R script to train with this dataset"
   task :write_r_script => :create_tables do
     script_folder = CONFIG['script'] || "scripts"
-    tree_folder = CONFIG['forests'] || "forests"
+    tree_folder = CONFIG['forest'] || "forests"
     tree_name = CONFIG['name'] || GROUP
     puts "Creating script folder if necessary: #{script_folder}"
     mkdir_p script_folder
