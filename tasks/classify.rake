@@ -71,7 +71,18 @@ namespace :classify do
   desc ""
   task :classify => :create_pyramid do
     @pyramid.each do |filename, img_array|
-      
+      img_array.each do |img|
+        windower = ImageWindower.new(img, window_cols, window_rows, window_step)
+        window_set = windower.window()
+        vectors = FeatureExtractor.extract_without_classes(window_set)
+        TableMaker.make_table_without_classes(vectors)
+        # write the R program
+        # execute the r program
+        # results will be saved to file...
+        
+        # read results
+        # every window with + for 
+      end
     end
   end
   

@@ -1,5 +1,4 @@
 samples: test/classify/samples
-pixel_info: I
 forests: 
   - test/forests/head1
 
@@ -9,3 +8,5 @@ scale:
   min: 0.2
   max: 1.20
   step: 0.2
+
+window: 10
