@@ -68,6 +68,13 @@ namespace :classify do
     end
   end
   
+  desc ""
+  task :classify => :create_pyramid do
+    @pyramid.each do |filename, img_array|
+      
+    end
+  end
+  
   desc "link up the tasks and run this thing"
   task :samples => [:set_options, :load_images, :load_trees, :create_pyramid]
   

@@ -6,8 +6,6 @@ namespace :common do
   # RETURNS: @images folder containing the loaded images from the folders
   desc "Gets the images from the folders described in the configuration file"
   task :get_images do
-    require 'RMagick'
-    include Magick
     @images = Hash.new
     @samples.each do |folder_name, target_type|
       if File.directory?(folder_name)
@@ -27,9 +25,8 @@ namespace :common do
     @images.each do |target_type, photo_array|
       vector_array = Array.new
       photo_array.each do |photo|
-        temp_photo = photo.export_pixels(0,0,photo.columns,photo.rows,CONFIG['pixel_info'])
-        temp_photo.map! {|pixel| pixel.to_f / QuantumRange.to_f}
-        vector_array << temp_photo
+        vector = FeatureExtractor.convert(photo)
+        vector_array << vector
       end
       @raw_data[target_type] = vector_array
     end
@@ -41,21 +38,7 @@ namespace :common do
     throw "Error: #{output_dir} does not exist" unless File.directory?(output_dir)
     @data_set_name = "#{output_dir}/#{GROUP}-testset.dat"
     @class_set_name = "#{output_dir}/#{GROUP}-classset.dat"
-    data_set = File.new(@data_set_name, "w")
-    class_set = File.new(@class_set_name, "w")
-    @cols = nil
-    @rows = 0
-    
-    @raw_data.each do |target_type, vector_array|
-      @rows += vector_array.size
-      vector_array.each do |vector|
-        @cols ||= vector.size
-        data_set << vector.join(" ") << "\n"
-        class_set << '"'<< target_type << '"' << "\n"
-      end      
-    end  
-    data_set.close
-    class_set.close
+    @cols, @rows = TableMaker.make_table(@data_set_name, @class_set_name, @raw_data)
   end
   
 end
