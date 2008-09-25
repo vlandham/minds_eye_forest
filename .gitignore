@@ -1,5 +1,6 @@
 .DS_Store
 **/.DS_Store
+.RData
 test/scripts
 test/test
 test/forests
