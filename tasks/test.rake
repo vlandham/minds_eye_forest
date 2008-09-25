@@ -1,7 +1,7 @@
 namespace :test do
   
   desc "Set a set of images against a trained random forest"
-  task :rf => [:set_options, "train:create_tables", :write_r_script, :test]
+  task :rf => [:set_options, "common:create_tables", :write_r_script, :test]
   
   desc "Sets where the folder of images to preprocess is, destination and preprocessing requirements"
   task :set_options do
@@ -18,7 +18,7 @@ namespace :test do
   end
   
   desc "Write R script to test a random forest"
-  task :write_r_script => "train:create_tables" do
+  task :write_r_script => "common:create_tables" do
     script_folder = CONFIG['script'] || "scripts"
     tree_folder = CONFIG['forest']
     
