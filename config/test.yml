@@ -1,6 +1,7 @@
 head1:
   samples:
     test/sample_out: head1
+    test/negative_out: negative_head1
   pixel_info: I
   forest: test/forests
   tables: test/test/datasets
