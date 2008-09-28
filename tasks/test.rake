@@ -30,11 +30,13 @@ namespace :test do
     
     puts "#{File.expand_path(tree_folder)} --"
     # Create the R script for this traingset / RF
-    script = RScriptMaker.new(@script_name)
+    
     forest_file_name = "#{tree_folder}/#{tree_name}.rf"
     set_name = 'testing_set'
     output_name = 'predictions'
     output_file = "#{File.expand_path(script_folder)}/#{tree_name}_preditions.txt"
+    
+    script = RScriptMaker.new(@script_name)
     script.library 'randomForest'
     script.load_matrix(set_name, @data_set_name, @rows,@cols)
     script.load forest_file_name
