@@ -9,12 +9,14 @@ class Window
   attr_accessor :y
   attr_accessor :width
   attr_accessor :height
+  attr_accessor :box
   def initialize(im, posx,posy,w,h)
     @image = im
     @x = posx
     @y = posy
     @width = w
     @height = h
+    @box = false
   end
   
   def to_a
@@ -42,7 +44,7 @@ class ImageWindower
   attr_reader :window_width
   attr_reader :window_height
   attr_reader :window_step
-
+  attr_accessor :box_indices
   def initialize(im, cols, rows, increment)
     @image = im
     @window_width = cols
@@ -77,6 +79,26 @@ class ImageWindower
       end #each window
     end #file
     [tot_rows,tot_cols]
+  end
+  
+  def add_boxes(indices)
+    @box_indices = indices
+  end
+  
+  def boxed_image
+    box_image = @image.copy
+     @windows.values_at(*@box_indices).each {|win| add_box(box_image,win)}
+     box_image
+  end
+  
+  def add_box(image, win)
+    box = Draw.new
+    box.stroke('red')
+    box.stroke_width(2)
+    box.fill_opacity(0)
+    # puts "rec: #{win.x}, #{win.y} --  #{win.x+win.width}, #{win.y+win.height}"
+    box.rectangle(win.x,win.y,win.x+win.width, win.y+win.height)
+    box.draw(image)
   end
   
   private

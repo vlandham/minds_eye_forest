@@ -97,9 +97,14 @@ namespace :classify do
           script.execute
           # results will be saved to file...
           r_reader = ResultReader.new(output_file)
+          # r_reader.print
           # read results
           targets = r_reader.positives
+
           # add boxes to matches in image
+          windower.add_boxes(targets)
+          img = windower.boxed_image
+          img.write "#{@tables_folder}/#{forest}_box.jpg"
           # save resulting matches in original image somehow...
           
         end
