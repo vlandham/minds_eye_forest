@@ -44,6 +44,7 @@ namespace :test do
     script.save_matrix(output_name,output_file)
     script.close
     
+    puts "Running script"
     script.execute
     # script_file = File.open(@script_name, 'w') do |file|
     #   file << "library(\'randomForest\')\n"
