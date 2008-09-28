@@ -13,12 +13,7 @@ namespace :classify do
     # samples is just a filename for now - should make it a list, or better, recurse through
     throw "Error: no sample folder" unless CONFIG["samples"]
     @sample_folder = CONFIG['samples']
-    
-    # Now we need to load those forests.  We'll have the forests option be an array of forests
-    throw "Error: no forests present" unless CONFIG['forests']
-    @forests = CONFIG['forests']
-    @forests.each {|fr| puts "Using forest: #{fr}.rf"}
-    
+
     # Lets also get that scripts folder going for us
     throw "Error: no scripts folder" unless CONFIG['script']
     @scripts_folder = CONFIG['script']
@@ -41,14 +36,12 @@ namespace :classify do
   end
   
   desc "gets the names of the trees to be used and ensures that they are all valid"
-  task :load_trees => :set_options do
-    @forest_names = Array.new
+  task :check_trees => :set_options do
+    throw "Error: no forests present" unless CONFIG['forests']
+    @forests = CONFIG['forests']  
     @forests.each do |fr|
-      if File.exists?("#{fr}.rf")
-        @forest_names << "#{fr}.rf"
-      else
-        throw "Error: #{fr}.rf not a forest present in the forest folder"
-      end
+      puts "Using forest: #{fr}.rf"
+      throw "Error: #{fr}.rf not a forest present in the forest folder" unless File.exists?("#{fr}.rf")
     end
   end
   
@@ -69,24 +62,50 @@ namespace :classify do
   end
   
   desc ""
-  task :classify => :create_pyramid do
+  task :classify => [:create_pyramid, :check_trees ] do
     @pyramid.each do |filename, img_array|
-      img_array.each do |img|
-        windower = ImageWindower.new(img, window_cols, window_rows, window_step)
-        window_set = windower.window()
-        vectors = FeatureExtractor.extract_without_classes(window_set)
-        TableMaker.make_table_without_classes(vectors)
-        # write the R program
-        # execute the r program
-        # results will be saved to file...
+      # img_array.each do |img|
+      img = img_array[0]
+        @forests.each do |full_forest|
+          forest = full_forest.split("/")[-1]
+          table_name = "#{@tables_folder}/#{forest}_classify.dat"
+          window_cols = 50
+          window_rows = 60
+          window_step = CONFIG['window'] || 10
+          puts "Windowing #{img.filename}"
+          windower = ImageWindower.new(img, window_cols, window_rows, window_step)
+          
+          puts "Creating table: #{table_name}"
+          rows, cols = windower.create_table(table_name)
+          puts "Table created with #{rows} rows and #{cols} columns"
+          # windower.write("#{File.dirname(__FILE__)}/../test/windows/window.jpg")
+          
+          puts "Writing R script for classification"
+          # write the R program
+          matrix_name = "classify_set"
+          output_name = "result"
+          script = RScriptMaker.new("#{@scripts_folder}/#{forest}_classify.R")
+          
+          script.library "randomForest"
+          script.load_matrix(matrix_name,table_name,rows,cols)
+          script.load "#{full_forest}.rf"
+          script.command "#{output_name} <- predict(#{forest}_rf, #{matrix_name})"
+          script.save_matrix(output_name, "#{@tables_folder}/#{forest}_output.txt")
+          script.close
+          # execute the r program
+          puts "Executing script: #{script.name}"
+          script.execute
+          # results will be saved to file...
         
-        # read results
-        # every window with + for 
-      end
+          # read results
+          # every window with + for 
+        end
+      # end
+      break
     end
   end
   
   desc "link up the tasks and run this thing"
-  task :samples => [:set_options, :load_images, :load_trees, :create_pyramid]
+  task :samples => [:set_options, :load_images, :check_trees, :create_pyramid, :classify]
   
 end
