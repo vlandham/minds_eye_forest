@@ -81,26 +81,28 @@ namespace :classify do
           # windower.write("#{File.dirname(__FILE__)}/../test/windows/window.jpg")
           
           puts "Writing R script for classification"
-          # write the R program
           matrix_name = "classify_set"
           output_name = "result"
+          output_file = "#{@tables_folder}/#{forest}_output.txt"
           script = RScriptMaker.new("#{@scripts_folder}/#{forest}_classify.R")
-          
           script.library "randomForest"
           script.load_matrix(matrix_name,table_name,rows,cols)
           script.load "#{full_forest}.rf"
           script.command "#{output_name} <- predict(#{forest}_rf, #{matrix_name})"
-          script.save_matrix(output_name, "#{@tables_folder}/#{forest}_output.txt")
+          script.save_matrix(output_name, output_file)
           script.close
-          # execute the r program
+          
           puts "Executing script: #{script.name}"
           script.execute
           # results will be saved to file...
-        
+          r_reader = ResultReader.new(output_file)
           # read results
-          # every window with + for 
+          targets = r_reader.positives
+          # add boxes to matches in image
+          # save resulting matches in original image somehow...
+          
         end
-      # end
+      # end #TODO: get this back up
       break
     end
   end

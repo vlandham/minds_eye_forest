@@ -1,7 +1,7 @@
 namespace :test do
   
   desc "Set a set of images against a trained random forest"
-  task :rf => [:set_options, "common:create_tables", :write_r_script, :test]
+  task :rf => [:set_options, "common:create_tables", :write_r_script]
   
   desc "Sets where the folder of images to preprocess is, destination and preprocessing requirements"
   task :set_options do
@@ -30,20 +30,27 @@ namespace :test do
     
     puts "#{File.expand_path(tree_folder)} --"
     # Create the R script for this traingset / RF
-    script_file = File.open(@script_name, 'w') do |file|
-      file << "library(\'randomForest\')\n"
-      file << "testing_set = matrix(scan(\'#{File.expand_path(@data_set_name)}\', n=#{@rows*@cols}),"
-      file << " #{@rows}, #{@cols}, byrow = TRUE)\n"
-      file << "load(file=\'#{File.expand_path(tree_folder)}/#{tree_name}.rf\')\n"
-      file << "predictions <- predict(#{tree_name}_rf, testing_set)\n"
-      file << "write.table(predictions, file=\"#{File.expand_path(script_folder)}/#{tree_name}_preditions.txt\" )\n"
-    end
-  end
-  
-  desc "Execute testing"
-  task :test => :write_r_script do
-    puts "Executing test script"
-    `r CMD BATCH #{File.expand_path(@script_name)} #{File.expand_path(@script_name)}out`
+    script = RScriptMaker.new(@script_name)
+    forest_file_name = "#{tree_folder}/#{tree_name}.rf"
+    set_name = 'testing_set'
+    output_name = 'predictions'
+    output_file = "#{File.expand_path(script_folder)}/#{tree_name}_preditions.txt"
+    script.library 'randomForest'
+    script.load_matrix(set_name, @data_set_name, @rows,@cols)
+    script.load forest_file_name
+    script.command "#{output_name} <- predict(#{tree_name}_rf, #{set_name})"
+    script.save_matrix(output_name,output_file)
+    script.close
+    
+    script.execute
+    # script_file = File.open(@script_name, 'w') do |file|
+    #   file << "library(\'randomForest\')\n"
+    #   file << "testing_set = matrix(scan(\'#{File.expand_path(@data_set_name)}\', n=#{@rows*@cols}),"
+    #   file << " #{@rows}, #{@cols}, byrow = TRUE)\n"
+    #   file << "load(file=\'#{File.expand_path(tree_folder)}/#{tree_name}.rf\')\n"
+    #   file << "predictions <- predict(#{tree_name}_rf, testing_set)\n"
+    #   file << "write.table(predictions, file=\"#{File.expand_path(script_folder)}/#{tree_name}_preditions.txt\" )\n"
+    # end
   end
   
   
