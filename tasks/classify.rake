@@ -53,11 +53,16 @@ namespace :classify do
     @pyramids = Hash.new
     puts "Resizing each image from #{scale_min} to #{scale_max} by #{scale_step} each time"
     @original_images.each do |img|
-      pym = Array.new
+      pym = Array.new      
       (scale_min..scale_max).step(scale_step) do |step|
         pym << img.scale(step)
       end
       @pyramids[img.filename] = pym
+    end
+    
+    @steps = Array.new
+    (scale_min..scale_max).step(scale_step) do |step|
+      @steps << step
     end
   end
   
