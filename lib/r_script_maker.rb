@@ -22,6 +22,10 @@ class RScriptMaker
     @script << "write.table(#{matrix_name}, file=\"#{File.expand_path(filename)}\" )\n"
   end
   
+  def assign(var, command)
+    @script << "#{var} <- #{command}\n"
+  end
+  
   def command(command)
     @script << command.to_s+"\n"
   end

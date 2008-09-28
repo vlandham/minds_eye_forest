@@ -1,10 +1,10 @@
 namespace :classify do
+  
   desc "Sets where the folder of images to classify is, and where the random forests are."
   task :set_options do
     puts "Reading configuration for classify"
     CONFIG = YAML.load_file("#{File.dirname(__FILE__)}/../config/classify.yml")
     
-    # create directory for the training datasets
     throw "Error: no tables folder" unless CONFIG["tables"]
     puts "creating directory structure for : #{CONFIG['tables']}"
     mkdir_p CONFIG['tables']
@@ -50,20 +50,20 @@ namespace :classify do
     scale_min = CONFIG['scale']['min'] || 0.4
     scale_max = CONFIG['scale']['max'] || 1.2
     scale_step = CONFIG['scale']['step'] || 0.2
-    @pyramid = Hash.new
+    @pyramids = Hash.new
     puts "Resizing each image from #{scale_min} to #{scale_max} by #{scale_step} each time"
     @original_images.each do |img|
       pym = Array.new
       (scale_min..scale_max).step(scale_step) do |step|
         pym << img.scale(step)
       end
-      @pyramid[img.filename] = pym
+      @pyramids[img.filename] = pym
     end
   end
   
   desc ""
   task :classify => [:create_pyramid, :check_trees ] do
-    @pyramid.each do |filename, img_array|
+    @pyramids.each do |filename, img_array|
       # img_array.each do |img|
       img = img_array[0]
         @forests.each do |full_forest|
@@ -88,7 +88,8 @@ namespace :classify do
           script.library "randomForest"
           script.load_matrix(matrix_name,table_name,rows,cols)
           script.load "#{full_forest}.rf"
-          script.command "#{output_name} <- predict(#{forest}_rf, #{matrix_name})"
+          script.assign(output_name, "predict(#{forest}_rf, #{matrix_name})")
+          # script.command "#{output_name} <- predict(#{forest}_rf, #{matrix_name})"
           script.save_matrix(output_name, output_file)
           script.close
           
