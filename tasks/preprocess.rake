@@ -6,6 +6,8 @@ namespace :pre do
     throw "Error: no input folder" unless CONFIG["input_dir"]
     throw "Error: not a valid input folder" unless File.directory?(CONFIG["input_dir"])
     throw "Error: no output folder" unless CONFIG["output_dir"]
+    puts "creating directory structure for : #{CONFIG['output_dir']}"
+    mkdir_p CONFIG['output_dir']
     @append = []
   end
   

@@ -21,6 +21,22 @@ class Magick::ImageList
   end
 end
 
+def to_bar_chart(hash, valuename, filename)
+  array = hash.sort
+  keys = array.map {|kh| kh[0]}
+
+  values = array.map {|kh| kh[1]}
+  
+  
+  graph = Scruffy::Graph.new
+  graph.renderer = Scruffy::Renderers::Standard.new
+  graph.add :bar, valuename, values
+  graph.point_markers = keys
+  graph.render :to => "line_test.svg"
+  graph.render  :width => 1800, :height => 600,
+    :to => filename.to_s+'.png', :as => 'png'
+end
+
 namespace :stats do
   
   desc "Test to see how to add input arguments to a task"
@@ -101,6 +117,61 @@ namespace :stats do
     min_width = @ping_list.min(:columns)
     puts "Min Width: #{min_width} of #{@ping_list.length} images"
     @report << "Min Width:\t#{min_width}\n"
+  end
+  
+  desc "size graph"
+  task :width_graph => :get_photos do
+    require 'scruffy'
+    width_hash = Hash.new(0)
+    @ping_list.each do |image|
+      col = image.columns
+      col = (col.to_f / 10.0).round * 10
+      width_hash[col] += 1
+    end
+    
+   to_bar_chart(width_hash, "widths", "widths")
+  end
+  
+  desc "size plot"
+  task :size_plot => :get_photos do
+    require 'gchart'
+    # widths = Array.new
+    # heights = Array.new
+    # ones = Array.new
+    size_hash = Hash.new(20)
+    @ping_list.each do |image|
+      size_hash[[image.columns, image.rows]] += 1
+      # widths << image.columns
+      # heights << image.rows
+      # ones << 1
+    end
+    
+    array = size_hash.sort
+    widths = array.map {|kh| kh[0][0]}
+    puts widths.inspect
+    
+    heights = array.map {|kh| kh[0][1]}
+    puts heights.inspect
+    ones = array.map {|kh| kh[1]}
+    puts ones.inspect
+    # Gchart.line(:data => [0, 40, 10, 70, 20])
+    # Gchart.scatter(:data => [widths,heights,ones], :format => 'file', :filename => 'size_plot.png',:size => '500x600')
+    Gchart.line(:data => widths, :format => 'file', :filename => 'size_plot.png',:size => '500x600')
+    # Gchart.scatter(:data => [[1,2,3], [2,3,4],[1,2,2]], :format => 'file', :filename => 'custom_filename.png')
+  end
+  
+  desc "get aspect ratio"
+  task :aspect_ratio => :get_photos do
+    require 'scruffy'
+    aspect_hash = Hash.new(0)
+    @ping_list.each do |image|
+      as = image.columns.to_f / image.rows.to_f
+      as = (as * 10.0).round.to_f/10.0
+      aspect_hash[as] += 1
+    end
+
+    to_bar_chart(aspect_hash, "ratios", "aspect_ratio")
+    
   end
 
 end

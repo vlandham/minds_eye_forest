@@ -34,6 +34,10 @@ class RScriptMaker
     `r CMD BATCH #{File.expand_path(@name)} #{File.expand_path(@name)}out`
   end
   
+  def quit
+    @script << "q(save = \"no\")\n"
+  end
+  
   def close
     @script.close
   end

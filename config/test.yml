@@ -1,12 +1,11 @@
-head1:
+head:
   samples:
-    test/sample_out: head1
-    test/negative_out: negative_head1
+    samples/head/test/all_face: head_all_face
+    samples/head/test/negative: head_negative
   pixel_info: I
-  forest: test/forests
-  tables: test/test/datasets
-  script: test/test/scripts
-
+  tables: output/head/datasets
+  script: output/head/scripts
+  forest: output/head/forests
 
 body1:
   samples:

@@ -1,3 +1,25 @@
-head1:
-  input_dir: test/sample_in
-  report: test/report.txt  
+head_all:
+  input_dir: samples/head/all
+  report: samples/head/all_report.txt  
+head_front:
+  input_dir: samples/head/front
+  report: samples/head/front_report.txt
+head_left_side:
+  input_dir: samples/head/leftside
+  report: samples/head/left_side_report.txt
+head_right_side:
+  input_dir: samples/head/rightside
+  report: samples/head/right_side_report.txt
+head_all_face:
+  input_dir: samples/head/all_face
+  report: samples/head/all_face_report.txt
+head_most_face_front:
+  input_dir: samples/head/most_face_front
+  report: samples/head/most_face_front_report.txt
+head_most_face_side:
+  input_dir: samples/head/most_face_side
+  report: samples/head/most_face_side_report.txt
+head_some_face:
+  input_dir: samples/head/some_face
+  report: samples/head/some_face_report.txt
+

@@ -42,10 +42,12 @@ namespace :test do
     script.load forest_file_name
     script.command "#{output_name} <- predict(#{tree_name}_rf, #{set_name})"
     script.save_matrix(output_name,output_file)
+    script.quit
     script.close
     
     puts "Running script"
     script.execute
+    
     # script_file = File.open(@script_name, 'w') do |file|
     #   file << "library(\'randomForest\')\n"
     #   file << "testing_set = matrix(scan(\'#{File.expand_path(@data_set_name)}\', n=#{@rows*@cols}),"

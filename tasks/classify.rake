@@ -74,8 +74,8 @@ namespace :classify do
         @forests.each do |full_forest|
           forest = full_forest.split("/")[-1]
           table_name = "#{@tables_folder}/#{forest}_classify.dat"
-          window_cols = 50
-          window_rows = 60
+          window_cols = 80
+          window_rows = 90
           window_step = CONFIG['window'] || 10
           puts "Windowing #{img.filename}"
           windower = ImageWindower.new(img, window_cols, window_rows, window_step)
@@ -96,6 +96,7 @@ namespace :classify do
           script.assign(output_name, "predict(#{forest}_rf, #{matrix_name})")
           # script.command "#{output_name} <- predict(#{forest}_rf, #{matrix_name})"
           script.save_matrix(output_name, output_file)
+          script.quit
           script.close
           
           puts "Executing script: #{script.name}"
@@ -114,7 +115,7 @@ namespace :classify do
           
         end
       # end #TODO: get this back up
-      break
+      break  #!!!!!!!!!!!!
     end
   end
   

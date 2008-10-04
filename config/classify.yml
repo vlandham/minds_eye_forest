@@ -1,9 +1,9 @@
-samples: test/classify/samples
+samples: samples/test
 forests: 
-  - test/forests/head1
+  - output/head/forests/head
 
-tables: test/classify/datasets
-script: test/classify/scripts
+tables: output/datasets
+script: output/scripts
 scale:
   min: 0.2
   max: 1.20

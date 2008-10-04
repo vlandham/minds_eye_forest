@@ -1,10 +1,13 @@
-head1:
+head:
   samples:
-    test/sample_out: head1
-    test/negative_out: negative_head1
-  tables: test/datasets
-  script: test/scripts
-  forest: test/forests
+    samples/head/out/all_face: head_all_face
+    samples/head/out/most_face_front: head_most_face_front
+    samples/head/out/most_face_side: head_most_face_side
+    samples/head/out/some_face: head_some_face
+    samples/head/out/negative: head_negative
+  tables: output/head/datasets
+  script: output/head/scripts
+  forest: output/head/forests
   trees: 100
 
 

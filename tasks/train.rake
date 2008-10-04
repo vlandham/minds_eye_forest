@@ -41,6 +41,7 @@ namespace :train do
       file << "class_set_factor <- factor(class_set)\n"
       file << "#{tree_name}_rf <- randomForest(training_set, class_set_factor#{tree_string}#{tries_string})\n"
       file << "save(#{tree_name}_rf, file=\'#{File.expand_path(tree_folder)}/#{tree_name}.rf\')\n"
+      file << "q(save = \"no\")\n"
     end
   end
   
