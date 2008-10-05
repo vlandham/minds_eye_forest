@@ -1,7 +1,7 @@
 namespace :train do
   
   desc "Chains the processing steps together to create a dataset from folders of images and train the RF"
-  task :rf => [:set_options, 'common:create_tables', :write_r_script, :train]
+  task :rf => [:set_options, 'common:create_tables', :run_r_script]
   
   desc "Sets where the folder of images to preprocess is, destination and preprocessing requirements"
   task :set_options do
@@ -17,7 +17,7 @@ namespace :train do
   end
   
   desc "write the R script to train with this dataset"
-  task :write_r_script => 'common:create_tables' do
+  task :run_r_script => 'common:create_tables' do
     script_folder = CONFIG['script'] || "scripts"
     tree_folder = CONFIG['forest'] || "forests"
     tree_name = CONFIG['name'] || GROUP
@@ -31,24 +31,39 @@ namespace :train do
     tree_string = CONFIG['trees'] ? ", ntree=#{CONFIG['trees']}" :  ", ntree=100"
     tries_string = CONFIG['tries'] ? ", mtry=#{CONFIG['tries']}" : ""
     
+    training_name = "training_set"
+    class_name = "class_set"
+    factor_name = "#{class_name}+_factor"
+    output_name = "result"
+    output_file = "#{@tables_folder}/#{forest}_output.txt"
+    
+    
+    script = RScriptMaker.new(@script_name)
+    script.library "randomForest"
+    script.load_matrix(training_name,@data_set_name,@rows,@cols)
+    script.load_vector(class_name,@class_set_name,@rows)
+    script.assign(factor_name,"factor(#{class_name})")
+    script.assign("#{tree_name}_rf", "randomForest(#{training_name}, #{factor_name}#{tree_string}#{tries_string})")
+    script.save("#{tree_name}_rf", "#{tree_folder}/#{tree_name}.rf")
+    script.quit
+    script.close
+    
+    puts "Running script"
+    script.execute
+    
     # Create the R script for this traingset / RF
-    script_file = File.open(@script_name, 'w') do |file|
-      file << "library(\'randomForest\')\n"
-      file << "training_set = matrix(scan(\'#{File.expand_path(@data_set_name)}\', n=#{@rows*@cols}),"
-      file << " #{@rows}, #{@cols}, byrow = TRUE)\n"
-      file << "class_set = matrix(scan(file=\'#{File.expand_path(@class_set_name)}\', what=\"\", n=#{@rows}),"
-      file << " #{@rows}, 1, byrow = TRUE)\n"
-      file << "class_set_factor <- factor(class_set)\n"
-      file << "#{tree_name}_rf <- randomForest(training_set, class_set_factor#{tree_string}#{tries_string})\n"
-      file << "save(#{tree_name}_rf, file=\'#{File.expand_path(tree_folder)}/#{tree_name}.rf\')\n"
-      file << "q(save = \"no\")\n"
-    end
+    # script_file = File.open(@script_name, 'w') do |file|
+      # file << "library(\'randomForest\')\n"
+      # file << "training_set = matrix(scan(\'#{File.expand_path(@data_set_name)}\', n=#{@rows*@cols}),"
+      # file << " #{@rows}, #{@cols}, byrow = TRUE)\n"
+      # file << "class_set = matrix(scan(file=\'#{File.expand_path(@class_set_name)}\', what=\"\", n=#{@rows}),"
+      # file << " #{@rows}, 1, byrow = TRUE)\n"
+      # file << "class_set_factor <- factor(class_set)\n"
+      # file << "#{tree_name}_rf <- randomForest(training_set, class_set_factor#{tree_string}#{tries_string})\n"
+      # file << "save(#{tree_name}_rf, file=\'#{File.expand_path(tree_folder)}/#{tree_name}.rf\')\n"
+      # file << "q(save = \"no\")\n"
+    # end
   end
   
-  desc "calls R in batch mode with the script created by this run"
-  task :train => :write_r_script do 
-    puts "running script in R"
-    `r CMD BATCH #{File.expand_path(@script_name)} #{File.expand_path(@script_name)}out`
-  end
   
 end

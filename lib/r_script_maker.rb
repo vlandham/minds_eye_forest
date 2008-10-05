@@ -14,8 +14,17 @@ class RScriptMaker
     @script << " #{rows}, #{cols}, byrow = TRUE)\n"
   end
   
+  def load_vector(vector_name, filename, rows)
+    @script << "#{vector_name} = matrix(scan(file=\'#{File.expand_path(filename)}\', what=\"\", n=#{rows}),"
+    @script << " #{rows}, 1, byrow = TRUE)\n"
+  end
+  
   def load(file)
     @script << "load(file=\'#{File.expand_path(file)}\')\n"
+  end
+  
+  def save(thing, file)
+    @script << "save(#{thing}, file=\'#{File.expand_path(file)}\')\n"
   end
   
   def save_matrix(matrix_name, filename)
