@@ -68,6 +68,8 @@ namespace :classify do
   
   desc ""
   task :classify => [:create_pyramid, :check_trees ] do
+    require 'ruby-prof'
+    
     @pyramids.each do |filename, img_array|
       # img_array.each do |img|
       img = img_array[0]
@@ -81,7 +83,9 @@ namespace :classify do
           windower = ImageWindower.new(img, window_cols, window_rows, window_step)
           
           puts "Creating table: #{table_name}"
+          RubyProf.start
           rows, cols = windower.create_table(table_name)
+          result = RubyProf.stop
           puts "Table created with #{rows} rows and #{cols} columns"
           # windower.write("#{File.dirname(__FILE__)}/../test/windows/window.jpg")
           
@@ -113,10 +117,17 @@ namespace :classify do
           img.write "#{@tables_folder}/#{forest}_box.jpg"
           # save resulting matches in original image somehow...
           
+          printer = RubyProf::FlatPrinter.new(result)
+          printer.print(File.new("result.txt","w"))
+          printer = RubyProf::GraphHtmlPrinter.new(result)
+          printer.print(File.new("result.html","w"))
+          
         end
       # end #TODO: get this back up
       break  #!!!!!!!!!!!!
     end
+
+    
   end
   
   desc "link up the tasks and run this thing"
