@@ -20,6 +20,33 @@ class Array
       }
     EOC
   end
+  
+   inline do |builder|
+     builder.c <<-EOC
+      static void
+      to_matrix() {
+        long i,j;
+        char buf[18];
+        VALUE str;
+
+        str = rb_str_buf_new2("");
+
+        for (i = 0; i < RARRAY(self)->len; i++) {
+          VALUE *inner_array =  RARRAY(self)->ptr[i];
+          for(j = 0; j < RARRAY(inner_array)->len;j++)
+          {
+            double value = RFLOAT(RARRAY(inner_array)->ptr[j])->value;
+            sprintf(buf, "%#.15f ", value);
+            printf("value = %s\\n", buf);
+            VALUE str_buf = rb_str_new2(buf);
+            rb_str_buf_cat(str, buf, sizeof(buf));
+          }
+          rb_str_buf_cat(str, "\\n", 1);
+        }
+        return str;
+      }
+    EOC
+  end
 end
 
 

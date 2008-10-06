@@ -72,7 +72,7 @@ namespace :classify do
     
     @pyramids.each do |filename, img_array|
       # img_array.each do |img|
-      img = img_array[0]
+      img = img_array[1]
         @forests.each do |full_forest|
           forest = full_forest.split("/")[-1]
           table_name = "#{@tables_folder}/#{forest}_classify.dat"
