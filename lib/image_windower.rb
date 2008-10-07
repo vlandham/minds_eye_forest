@@ -84,7 +84,8 @@ class ImageWindower
     File.open(table_name,'w') do |f|
       f << s
     end #file
-    
+    s = nil
+    vector_array = nil
     [tot_rows,tot_cols]
   end
   

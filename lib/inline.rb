@@ -26,14 +26,18 @@ class Array
       static void
       to_matrix() {
         long i,j;
-        char buf[18];
+        int buffer_size = 18;
+        float len1 = RARRAY(self)->len;
+        float len2 = RARRAY(RARRAY(self)->ptr[0])->len;
+        float total = len1*len2*buffer_size;
+        
+        char buf[buffer_size];
         VALUE str;
+        str = rb_str_buf_new(total);
 
-        str = rb_str_buf_new2("");
-
-        for (i = 0; i < RARRAY(self)->len; i++) {
+        for (i = 0; i < len1; i++) {
           VALUE *inner_array =  RARRAY(self)->ptr[i];
-          for(j = 0; j < RARRAY(inner_array)->len;j++)
+          for(j = 0; j < len2;j++)
           {
             double value = RFLOAT(RARRAY(inner_array)->ptr[j])->value;
             sprintf(buf, "%#.15f ", value);
@@ -43,6 +47,50 @@ class Array
           }
           rb_str_buf_cat(str, "\\n", 1);
         }
+        return str;
+      }
+    EOC
+  end
+  
+   inline do |builder|
+     builder.c <<-EOC
+      static void
+      to_matrix_fast() {
+        long i,j,k;
+        int buffer_size = 18;
+        
+        float len1 = RARRAY(self)->len;
+        float len2 = RARRAY(RARRAY(self)->ptr[0])->len;
+        
+        int total = len1*len2*buffer_size;
+        int index = 0;
+        char buf[buffer_size];
+        printf("total: %i\\n", total);
+        char* large_buffer;
+        large_buffer = ALLOC_N(char,total);
+        
+        for (i = 0; i < len1; i++) {
+          VALUE *inner_array =  RARRAY(self)->ptr[i];
+          //printf("len: %f\\n", RFLOAT(RARRAY(inner_array)->len));
+          for(j = 0; j < len2;j++)
+          {
+            double value = RFLOAT(RARRAY(inner_array)->ptr[j])->value;
+            sprintf(buf, "%#.15f ", value);
+            
+            for(k = 0;k< buffer_size;k++)
+              {
+              //  printf("index: %i\\n", index);
+                large_buffer[index] = buf[k];
+                index++;
+              }
+          }
+          large_buffer[index] = '\\n';
+         // printf("index: %i\\n", index);
+          index++;
+        }
+        VALUE str;
+        str = rb_str_buf_new2(large_buffer);
+        free(large_buffer);
         return str;
       }
     EOC
