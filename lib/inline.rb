@@ -37,8 +37,8 @@ class Array
           {
             double value = RFLOAT(RARRAY(inner_array)->ptr[j])->value;
             sprintf(buf, "%#.15f ", value);
-            printf("value = %s\\n", buf);
-            VALUE str_buf = rb_str_new2(buf);
+           // printf("value = %s\\n", buf);
+            //VALUE str_buf = rb_str_new2(buf);
             rb_str_buf_cat(str, buf, sizeof(buf));
           }
           rb_str_buf_cat(str, "\\n", 1);

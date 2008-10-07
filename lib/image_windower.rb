@@ -69,17 +69,20 @@ class ImageWindower
     # require 'feature_extractor'
     tot_rows = 0
     tot_cols = nil
-    file_string = ""
+    # file_string = ""
+    vector_array = Array.new
       @windows.each do |win|
         wi = win.window
         vec = FeatureExtractor.convert(wi)
         tot_cols ||= vec.size
-        st = vec.join(" ") 
-        file_string << "#{st}\n"
+        vector_array << vec
+        # st = vec.join(" ") 
+        # file_string << "#{st}\n"
         tot_rows += 1
       end #each window
+      s = vector_array.to_matrix
     File.open(table_name,'w') do |f|
-      f << file_string
+      f << s
     end #file
     
     [tot_rows,tot_cols]
