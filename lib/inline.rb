@@ -28,15 +28,18 @@ class Array
         long i,j;
         int buffer_size = 18;
         float len1 = RARRAY(self)->len;
+        if(len1 <= 0)
+          rb_raise(rb_eTypeError, "matrix is empty");
+        //printf("len1 = %f\\n", len1);
         float len2 = RARRAY(RARRAY(self)->ptr[0])->len;
         float total = len1*len2*buffer_size;
-        
+        //printf("total = %f\\n", total);
         char buf[buffer_size];
         VALUE str;
         str = rb_str_buf_new(total);
 
         for (i = 0; i < len1; i++) {
-          VALUE *inner_array =  RARRAY(self)->ptr[i];
+          VALUE *inner_array = RARRAY(self)->ptr[i];
           for(j = 0; j < len2;j++)
           {
             double value = RFLOAT(RARRAY(inner_array)->ptr[j])->value;

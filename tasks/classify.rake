@@ -45,6 +45,17 @@ namespace :classify do
     end
   end
   
+  desc "resize the image initially to standardize all images"
+  task :resize => :load_images do
+    geometry = '800x600>'
+    puts "resizing to : #{geometry}"
+    @original_images.each do |img|
+      img.change_geometry!(geometry) { |cols, rows, img|
+       img.resize!(cols, rows)
+       } 
+    end
+  end
+  
   desc "create gaussian pyramid for each image to test - different sizes to find different sized targets"
   task :create_pyramid => :load_images do
     scale_min = CONFIG['scale']['min'] || 0.4
@@ -59,7 +70,7 @@ namespace :classify do
       end
       @pyramids[img.filename] = pym
     end
-    
+    # is this needed ? we have the base_columns and base_rows still in the resized images...
     @steps = Array.new
     (scale_min..scale_max).step(scale_step) do |step|
       @steps << step
@@ -68,7 +79,7 @@ namespace :classify do
   
   desc ""
   task :classify => [:create_pyramid, :check_trees ] do
-    require 'ruby-prof'
+    # require 'ruby-prof'
     
     @pyramids.each do |filename, img_array|
       # img_array.each do |img|
@@ -83,9 +94,9 @@ namespace :classify do
           windower = ImageWindower.new(img, window_cols, window_rows, window_step)
           
           puts "Creating table: #{table_name}"
-          RubyProf.start
+          # RubyProf.start
           rows, cols = windower.create_table(table_name)
-          result = RubyProf.stop
+          # result = RubyProf.stop
           puts "Table created with #{rows} rows and #{cols} columns"
           # windower.write("#{File.dirname(__FILE__)}/../test/windows/window.jpg")
           
@@ -103,24 +114,28 @@ namespace :classify do
           script.quit
           script.close
           
-          puts "Executing script: #{script.name}"
+          puts "Executing script: #{script.name}..."
           script.execute
-          # results will be saved to file...
+          puts "done"
+          
+          puts "Reading results"        
           r_reader = ResultReader.new(output_file)
           # r_reader.print
-          # read results
+          
           targets = r_reader.positives
 
           # add boxes to matches in image
           windower.add_boxes(targets)
           img = windower.boxed_image
-          img.write "#{@tables_folder}/#{forest}_box.jpg"
+          img.write "#{@tables_folder}/#{forest}_#{img.columns}x#{img.rows}_box.jpg"
+          
+          puts "original size: #{img.base_columns}x#{img.base_rows}"
           # save resulting matches in original image somehow...
           
-          printer = RubyProf::FlatPrinter.new(result)
-          printer.print(File.new("result.txt","w"))
-          printer = RubyProf::GraphHtmlPrinter.new(result)
-          printer.print(File.new("result.html","w"))
+          # printer = RubyProf::FlatPrinter.new(result)
+          # printer.print(File.new("result.txt","w"))
+          # printer = RubyProf::GraphHtmlPrinter.new(result)
+          # printer.print(File.new("result.html","w"))
           
         end
       # end #TODO: get this back up
@@ -131,6 +146,6 @@ namespace :classify do
   end
   
   desc "link up the tasks and run this thing"
-  task :samples => [:set_options, :load_images, :check_trees, :create_pyramid, :classify]
+  task :samples => [:set_options, :load_images, :check_trees, :resize, :create_pyramid, :classify]
   
 end

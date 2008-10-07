@@ -17,6 +17,8 @@ class Window
     @width = w
     @height = h
     @box = false
+    @x_scale = (im.columns.to_f / im.base_columns.to_f).to_f
+    @y_scale = (im.rows.to_f / im.base_rows.to_f).to_f
   end
   
   def to_a
@@ -66,7 +68,6 @@ class ImageWindower
   end
   
   def create_table(table_name)
-    # require 'feature_extractor'
     tot_rows = 0
     tot_cols = nil
     # file_string = ""
@@ -90,6 +91,7 @@ class ImageWindower
   end
   
   def add_boxes(indices)
+    # lazy boxing
     @box_indices = indices
   end
   
