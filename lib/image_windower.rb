@@ -3,41 +3,87 @@
 #  returns an array of images from the original, each of size width x height,
 #   where the image at 
 
-class Window
-  attr_accessor :image
+class Box
   attr_accessor :x
   attr_accessor :y
   attr_accessor :width
   attr_accessor :height
-  attr_accessor :box
-  def initialize(im, posx,posy,w,h)
-    @image = im
+  attr_accessor :x_scale
+  attr_accessor :y_scale
+  def initialize(posx,posy,w,h)
     @x = posx
     @y = posy
     @width = w
     @height = h
-    @box = false
-    @x_scale = (im.columns.to_f / im.base_columns.to_f).to_f
-    @y_scale = (im.rows.to_f / im.base_rows.to_f).to_f
+  end
+  
+  def scale!
+    @x = (@x.to_f / @x_scale).round
+    @y = (@y.to_f / @y_scale).round
+    @width = (@width / @x_scale).round
+    @height = (@height / @y_scale).round
+  end
+  
+  def drawing
+    box_draw = Draw.new
+    box_draw.stroke('red')
+    box_draw.stroke_width(2)
+    box_draw.fill_opacity(0)
+    # puts "rec: #{win.x}, #{win.y} --  #{win.x+win.width}, #{win.y+win.height}"
+    box_draw.rectangle(@x,@y,@x+@width, @y+@height)
+    box_draw
+  end
+  
+  def draw(im)
+    draw_box = drawing
+    draw_box.draw(im)
+  end
+end
+
+class Window
+  attr_accessor :image
+  attr_accessor :box
+  def initialize(im, posx,posy,w,h)
+    @image = im
+    @box = Box.new(posx,posy,w,h)
+    @box.x_scale = (im.columns.to_f / im.base_columns.to_f).to_f
+    @box.y_scale = (im.rows.to_f / im.base_rows.to_f).to_f
   end
   
   def to_a
     # puts "getting #{@width} by #{@height} from #{@image.inspect}"
-    temp= @image.get_pixels(@x,@y,@width,@height)
+    temp= @image.get_pixels(@box.x,@box.y,@box.width,@box.height)
     # puts temp.length.to_s
     temp
   end
   
   def write(filename)
-    window_image = Image.constitute(@width,@height, 'RGBA', self.to_a)
+    window_image = Image.constitute(@box.width,@box.height, 'RGBA', self.to_a)
     window_image.write(filename)
     # new_eye.store_pixels(0,0,col,row,pixs)
   end
   
   def window
-    img = Image.new(@width,@height)
-    img.store_pixels(0,0,@width,@height,self.to_a)
+    img = Image.new(@box.width,@box.height)
+    img.store_pixels(0,0,@box.width,@box.height,self.to_a)
     img
+  end
+  
+  def draw(image)
+    @box.draw(image)
+  end
+  
+  def x
+    @box.x
+  end
+  def y
+    @box.y
+  end
+  def width
+    @box.width
+  end
+  def height
+    @box.height
   end
 end
 
@@ -97,18 +143,22 @@ class ImageWindower
   
   def boxed_image
     box_image = @image.copy
-     @windows.values_at(*@box_indices).each {|win| add_box(box_image,win)}
+     @windows.values_at(*@box_indices).each {|win| draw_box(box_image,win)}
      box_image
   end
   
-  def add_box(image, win)
-    box = Draw.new
-    box.stroke('red')
-    box.stroke_width(2)
-    box.fill_opacity(0)
-    # puts "rec: #{win.x}, #{win.y} --  #{win.x+win.width}, #{win.y+win.height}"
-    box.rectangle(win.x,win.y,win.x+win.width, win.y+win.height)
-    box.draw(image)
+  def get_boxes
+    @windows.values_at(*@box_indices).map {|win| win.box}
+  end
+  
+  def get_scaled_boxes
+    boxes = get_boxes
+    boxes.each {|b| b.scale!}
+    boxes
+  end
+  
+  def draw_box(image, win)
+    win.draw(image)
   end
   
   private
