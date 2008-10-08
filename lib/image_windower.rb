@@ -10,11 +10,13 @@ class Box
   attr_accessor :height
   attr_accessor :x_scale
   attr_accessor :y_scale
+  attr_accessor :votes
   def initialize(posx,posy,w,h)
     @x = posx
     @y = posy
     @width = w
     @height = h
+    @votes = 0
   end
   
   def scale!
@@ -116,23 +118,28 @@ class ImageWindower
   def create_table(table_name)
     tot_rows = 0
     tot_cols = nil
-    # file_string = ""
-    vector_array = Array.new
+    file_string = ""
+    # vector_array = Array.new
       @windows.each do |win|
         wi = win.window
         vec = FeatureExtractor.convert(wi)
         tot_cols ||= vec.size
-        vector_array << vec
-        # st = vec.join(" ") 
-        # file_string << "#{st}\n"
+        # vector_array << vec
+        file_string << "#{vec.to_s_quick}\n"
         tot_rows += 1
+        wi.destroy!
+        wi = nil
+        vec = nil
       end #each window
-      s = vector_array.to_matrix
+      # s = vector_array.to_matrix
     File.open(table_name,'w') do |f|
-      f << s
+      # f << s
+      f << file_string
     end #file
+
     s = nil
     vector_array = nil
+
     [tot_rows,tot_cols]
   end
   

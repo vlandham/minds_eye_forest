@@ -21,6 +21,36 @@ class Array
     EOC
   end
   
+  inline do |builder|
+    builder.c <<-EOC
+     static void
+     to_s_quick() {
+       int i;
+       float len = RARRAY(self)->len;
+       if(len <= 0)
+          rb_raise(rb_eTypeError, "array is empty");
+       int buffer_size = 18;
+       float total = len*buffer_size;
+      
+       char buf[buffer_size];
+       
+       VALUE str;
+       str = rb_str_buf_new(total);
+       for(i = 0; i < len;i++)
+       {
+         double value = RFLOAT(RARRAY(self)->ptr[i])->value;
+         sprintf(buf, "%#.15f ", value);
+        // printf("value = %s\\n", buf);
+         //VALUE str_buf = rb_str_new2(buf);
+         rb_str_buf_cat(str, buf, sizeof(buf));
+       }
+       rb_str_buf_cat(str, "\\n", 1);
+
+     return str;
+     }
+     EOC
+   end
+  
    inline do |builder|
      builder.c <<-EOC
       static void

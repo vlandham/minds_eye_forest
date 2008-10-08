@@ -75,22 +75,33 @@ namespace :classify do
     (scale_min..scale_max).step(scale_step) do |step|
       @steps << step
     end
+    
+    @original_images.each do |im| 
+      im.destroy!
+    end
+    
+    @original_images = nil
+      
   end
   
   desc ""
   task :classify => [:create_pyramid, :check_trees ] do
+    # MemoryProfiler.start
     # require 'ruby-prof'
-    
+    # RubyProf.measure_mode = RubyProf:::MEMORY
+    # RubyProf.start
+    @results = ClassificationResults.new
     @pyramids.each do |filename, img_array|
-      # img_array.each do |img|
-      img = img_array[0]
+      image_result = ImageResult.new(filename)
+      while img_array.size > 0
+        img = img_array.shift
         @forests.each do |full_forest|
           forest = full_forest.split("/")[-1]
           table_name = "#{@tables_folder}/#{forest}_classify.dat"
           window_cols = 80
           window_rows = 90
           window_step = CONFIG['window'] || 10
-          puts "Windowing #{img.filename}"
+          puts "Windowing #{img.filename} - #{img.columns}x#{img.rows}"
           windower = ImageWindower.new(img, window_cols, window_rows, window_step)
           
           puts "Creating table: #{table_name}"
@@ -115,7 +126,10 @@ namespace :classify do
           script.close
           
           puts "Executing script: #{script.name}..."
-          script.execute
+          gc = Thread.new {GC.start}
+          exe = Thread.new {  script.execute }
+          gc.join
+          exe.join
           puts "done"
           
           puts "Reading results"        
@@ -129,20 +143,30 @@ namespace :classify do
           img = windower.boxed_image
           img.write "#{@tables_folder}/#{forest}_#{img.columns}x#{img.rows}_box.jpg"
           
+          image_result.add_target(forest,windower.get_scaled_boxes)
+          
           puts "original size: #{img.base_columns}x#{img.base_rows}"
-          # save resulting matches in original image somehow...
+          
+          windower = nil
+          img.destroy!
+          img = nil
+          
           
           # printer = RubyProf::FlatPrinter.new(result)
           # printer.print(File.new("result.txt","w"))
           # printer = RubyProf::GraphHtmlPrinter.new(result)
           # printer.print(File.new("result.html","w"))
           
-        end
-      # end #TODO: get this back up
-      break  #!!!!!!!!!!!!
+        end #each forest
+      end #TODO: get this back up
+      @results.add(image_result)
     end
-
     
+    # result = RubyProf.stop
+    # printer = RubyProf::FlatPrinter.new(result)
+    # printer.print(File.new("memory.txt","w"))
+    # printer = RubyProf::GraphHtmlPrinter.new(result)
+    # printer.print(File.new("memory.html","w"))
   end
   
   desc "link up the tasks and run this thing"
