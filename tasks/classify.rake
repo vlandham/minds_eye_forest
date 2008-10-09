@@ -27,7 +27,7 @@ namespace :classify do
     include Magick
     if File.directory?(@sample_folder)
       puts "Loading images from #{@sample_folder}"
-      photo_files = FileList["#{@sample_folder}/*.jpg","#{@sample_folder}/*.png"]
+      photo_files = FileList["#{@sample_folder}/*.jpg","#{@sample_folder}/*.png","#{@sample_folder}/*.JPG"]
       @original_images = ImageList.new(*photo_files)
     else
       puts "Error: not a valid input folder - #{@sample_folder}"
@@ -141,7 +141,7 @@ namespace :classify do
           # add boxes to matches in image
           windower.add_boxes(targets)
           img = windower.boxed_image
-          img.write "#{@tables_folder}/#{forest}_#{img.columns}x#{img.rows}_box.jpg"
+          img.write "#{@tables_folder}/#{filename}_#{img.columns}x#{img.rows}_#{forest}.jpg"
           
           image_result.add_target(forest,windower.get_scaled_boxes)
           
