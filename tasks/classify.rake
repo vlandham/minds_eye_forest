@@ -169,7 +169,7 @@ namespace :classify do
           # printer.print(File.new("result.html","w"))
           
         end #each forest
-      end #TODO: get this back up
+      end 
       @results.add(image_result)
     end
     
