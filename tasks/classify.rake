@@ -38,13 +38,17 @@ namespace :classify do
   desc "gets the names of the trees to be used and ensures that they are all valid"
   task :check_trees => :set_options do
     throw "Error: no forests present" unless CONFIG['forests']
+    
+    puts "reading in preprocessing data"
+    training_config = YAML.load_file("#{File.dirname(__FILE__)}/../config/preprocess.yml")
+    @sizes = Hash.new
     @forests = CONFIG['forests']  
     @forests.each do |fr|
-      training_config = YAML.load_file("#{File.dirname(__FILE__)}/../config/preprocess.yml")
       if File.exists?("#{fr}.rf")
         puts "Using forest: #{fr}.rf"
-        puts "loading dimensions from training"
-        
+        @size[fr] = training_config[fr][size]
+        throw "Error: now size for #{fr} " unless @size[fr]
+        puts "size for #{fr}: #{@size[fr][x]}x#{@size[fr][y]}"
       else
         throw "Error: #{fr}.rf not a forest present in the forest folder" unless File.exists?("#{fr}.rf")
       end
@@ -105,8 +109,8 @@ namespace :classify do
         @forests.each do |full_forest|
           forest = full_forest.split("/")[-1]
           table_name = "#{@tables_folder}/#{forest}_classify.dat"
-          window_cols = 80
-          window_rows = 90
+          window_cols = @sizes[full_forest][x]
+          window_rows = @sizes[full_forest][y]
           window_step = CONFIG['window'] || 10
           puts "Windowing #{img.filename} - #{img.columns}x#{img.rows}"
           windower = ImageWindower.new(img, window_cols, window_rows, window_step)

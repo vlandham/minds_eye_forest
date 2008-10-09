@@ -9,8 +9,7 @@ namespace :pre do
   desc "gets the photos and puts them into @photo_list instance variable."
   task :get_photos => :set_options do
     require 'RMagick'
-    include Magick
-    
+    include Magick    
     @photos = Hash.new
     CONFIG['folders'].each do |folder|
       # puts folder.inspect
@@ -41,8 +40,7 @@ namespace :pre do
       throw "Error: no output folder" unless folder["output_dir"]
       puts "creating directory structure for : #{folder['output_dir']}"
       mkdir_p folder['output_dir']
-      
-  
+ 
       photo_list.write(file_name)
     end 
   end
