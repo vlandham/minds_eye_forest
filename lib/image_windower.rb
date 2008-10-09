@@ -125,7 +125,7 @@ class ImageWindower
         vec = FeatureExtractor.convert(wi)
         tot_cols ||= vec.size
         # vector_array << vec
-        file_string << "#{vec.to_s_quick}\n"
+        file_string << "#{vec.to_int_s_quick}\n"
         tot_rows += 1
         wi.destroy!
         wi = nil

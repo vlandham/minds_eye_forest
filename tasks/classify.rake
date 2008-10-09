@@ -141,7 +141,7 @@ namespace :classify do
           # add boxes to matches in image
           windower.add_boxes(targets)
           img = windower.boxed_image
-          img.write "#{@tables_folder}/#{filename}_#{img.columns}x#{img.rows}_#{forest}.jpg"
+          img.write "#{@tables_folder}/#{filename.split("/")[-1].split(".")[0]}_#{img.columns}x#{img.rows}_#{forest}.jpg"
           
           image_result.add_target(forest,windower.get_scaled_boxes)
           

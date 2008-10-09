@@ -4,12 +4,32 @@ class Array
   
   inline do |builder|
     builder.c <<-EOC
+      static VALUE divide_each_up_to_int(VALUE value, VALUE round) {
+        double divider = NUM2DBL(value);
+        double rounder = NUM2DBL(round);
+        
+        long i;
+        for (i = 0; i < RARRAY(self)->len; i++) {
+          int temp = (NUM2DBL(RARRAY(self)->ptr[i]) / divider)*rounder;
+          VALUE temp2 = rb_int_new(temp);
+          //printf("temp is %f \\n ", RARRAY(self)->ptr[i]);
+          MEMCPY(RARRAY(self)->ptr+i,&temp2,VALUE,1);
+          //RARRAY(self)->ptr[i] = &temp2;
+          //printf("temp is %f \\n ", RARRAY(self)->ptr[i]);
+        }
+        return self;
+      }
+    EOC
+  end
+  
+  inline do |builder|
+    builder.c <<-EOC
       static VALUE divide_each(VALUE value) {
         double divider = NUM2DBL(value);
         
         long i;
         for (i = 0; i < RARRAY(self)->len; i++) {
-          double temp = NUM2DBL(RARRAY(self)->ptr[i]) / divider;
+          double temp = (NUM2DBL(RARRAY(self)->ptr[i]) / divider);
           VALUE temp2 = rb_float_new(temp);
           //printf("temp is %f \\n ", RARRAY(self)->ptr[i]);
           MEMCPY(RARRAY(self)->ptr+i,&temp2,VALUE,1);
@@ -20,6 +40,37 @@ class Array
       }
     EOC
   end
+  
+	inline do |builder|
+    builder.c <<-EOC
+     static void
+     to_int_s_quick() {
+       int i;
+       float len = RARRAY(self)->len;
+       if(len <= 0)
+          rb_raise(rb_eTypeError, "array is empty");
+       int buffer_size = 18;
+       float total = len*buffer_size;
+      
+       char buf[buffer_size];
+       
+       VALUE str;
+       str = rb_str_buf_new(total);
+       for(i = 0; i < len;i++)
+       {
+         int value = NUM2INT(RARRAY(self)->ptr[i]);
+         sprintf(buf, "%i ", value);
+         //printf("value = %s\\n", buf);
+         //VALUE str_buf = rb_str_new2(buf);
+         rb_str_buf_cat2(str, buf);
+       }
+       rb_str_buf_cat(str, "\\n", 1);
+
+     return str;
+     }
+     EOC
+   end
+
   
   inline do |builder|
     builder.c <<-EOC

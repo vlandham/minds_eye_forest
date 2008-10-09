@@ -10,7 +10,7 @@ class TableMaker
       rows += vector_array.size
       vector_array.each do |vector|
         cols ||= vector.size
-        data_set << vector.join(" ") << "\n"
+        data_set << "#{vector.to_int_s_quick}\n"
         class_set << '"'<< target_type << '"' << "\n"
       end      
     end  
