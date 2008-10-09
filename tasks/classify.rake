@@ -40,8 +40,15 @@ namespace :classify do
     throw "Error: no forests present" unless CONFIG['forests']
     @forests = CONFIG['forests']  
     @forests.each do |fr|
-      puts "Using forest: #{fr}.rf"
-      throw "Error: #{fr}.rf not a forest present in the forest folder" unless File.exists?("#{fr}.rf")
+      training_config = YAML.load_file("#{File.dirname(__FILE__)}/../config/preprocess.yml")
+      if File.exists?("#{fr}.rf")
+        puts "Using forest: #{fr}.rf"
+        puts "loading dimensions from training"
+        
+      else
+        throw "Error: #{fr}.rf not a forest present in the forest folder" unless File.exists?("#{fr}.rf")
+      end
+      
     end
   end
   

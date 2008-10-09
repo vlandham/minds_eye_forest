@@ -1,31 +1,22 @@
-head_all_face:
-  input_dir: samples/head/all_face
-  output_dir: samples/head/out/all_face
+head:
+  folders:
+    - name: head_all_face
+      input_dir: samples/head/all_face
+      output_dir: samples/head/out/all_face
+    - name: head_most_face_front
+      input_dir: samples/head/most_face_front
+      output_dir: samples/head/out/most_face_front
+    - name: head_most_face_side
+      input_dir: samples/head/most_face_side
+      output_dir: samples/head/out/most_face_side
+    - name: head_some_face
+      input_dir: samples/head/some_face
+      output_dir: samples/head/out/some_face
+    - name: head_negative
+      input_dir: samples/head/negative
+      output_dir: samples/head/out/negative
   size:
     w: 80
     h: 90
-head_most_face_front:
-  input_dir: samples/head/most_face_front
-  output_dir: samples/head/out/most_face_front
-  size:
-    w: 80
-    h: 90
-head_most_face_side:
-  input_dir: samples/head/most_face_side
-  output_dir: samples/head/out/most_face_side
-  size:
-    w: 80
-    h: 90
-head_some_face:
-  input_dir: samples/head/some_face
-  output_dir: samples/head/out/some_face
-  size:
-    w: 80
-    h: 90
-head_negative:
-  input_dir: samples/head/negative
-  output_dir: samples/head/out/negative
-  size:
-    w: 80
-    h: 90
+    
   
