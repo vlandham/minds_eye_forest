@@ -20,11 +20,11 @@ namespace :train do
   task :run_r_script => 'common:create_tables' do
     script_folder = CONFIG['script'] || "scripts"
     tree_folder = CONFIG['forest'] || "forests"
-    tree_name = CONFIG['name'] || GROUP
+    forest_name = CONFIG['name'] || GROUP
     puts "Creating script folder if necessary: #{script_folder}"
     mkdir_p script_folder
     mkdir_p tree_folder
-    @script_name = "#{script_folder}/#{tree_name}_train.R"
+    @script_name = "#{script_folder}/#{forest_name}_train.R"
     puts "Creating script: #{@script_name}"
     
     # if # of tress or # of attributes to look at are given, set that up here.
@@ -35,7 +35,7 @@ namespace :train do
     class_name = "class_set"
     factor_name = "#{class_name}+_factor"
     output_name = "result"
-    output_file = "#{@tables_folder}/#{forest}_output.txt"
+    output_file = "#{@tables_folder}/#{forest_name}_output.txt"
     
     
     script = RScriptMaker.new(@script_name)
@@ -43,8 +43,8 @@ namespace :train do
     script.load_matrix(training_name,@data_set_name,@rows,@cols)
     script.load_vector(class_name,@class_set_name,@rows)
     script.assign(factor_name,"factor(#{class_name})")
-    script.assign("#{tree_name}_rf", "randomForest(#{training_name}, #{factor_name}#{tree_string}#{tries_string})")
-    script.save("#{tree_name}_rf", "#{tree_folder}/#{tree_name}.rf")
+    script.assign("#{forest_name}_rf", "randomForest(#{training_name}, #{factor_name}#{tree_string}#{tries_string})")
+    script.save("#{forest_name}_rf", "#{tree_folder}/#{forest_name}.rf")
     script.quit
     script.close
     
