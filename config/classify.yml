@@ -4,6 +4,7 @@ forests:
 
 tables: output/datasets
 script: output/scripts
+temp: output/temp/head
 scale:
   min: 0.2
   max: 1.20

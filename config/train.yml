@@ -7,7 +7,7 @@ head:
     samples/head/out/negative: head_negative
   tables: output/head/datasets
   script: output/head/scripts
-  forest: output/head/forests
+  forest: output/head/forests/head
   trees: 100
 
 

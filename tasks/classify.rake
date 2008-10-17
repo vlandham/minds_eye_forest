@@ -19,6 +19,11 @@ namespace :classify do
     @scripts_folder = CONFIG['script']
     puts "creating directory structure for scripts: #{@scripts_folder}"
     mkdir_p @scripts_folder
+    
+    throw "Error: no temp directory" unless CONFIG['temp']
+    @temp_folder = CONFIG['temp']
+    puts "creating directory structure for temp folder: #{@temp_folder}"
+    mkdir_p @temp_folder
   end
   
   desc "loads images from samples folder"
@@ -42,17 +47,18 @@ namespace :classify do
     puts "reading in preprocessing data"
     training_config = YAML.load_file("#{File.dirname(__FILE__)}/../config/preprocess.yml")
     @sizes = Hash.new
-    @forests = CONFIG['forests']  
-    @forests.each do |fr|
-      if File.exists?("#{fr}.rf")
-        puts "Using forest: #{fr}.rf"
-        @size[fr] = training_config[fr][size]
-        throw "Error: now size for #{fr} " unless @size[fr]
-        puts "size for #{fr}: #{@size[fr][x]}x#{@size[fr][y]}"
+    @forest_groups = CONFIG['forests']  
+    @forest_groups.each do |fr|
+      if File.exists?("#{fr}") && File.directory?("#{fr}")
+        puts "Using forest directory: #{fr}"
+        rf_name = fr.split("/")[-1]
+        throw "Error: now size for #{rf_name} " unless training_config[rf_name]['size']
+        @sizes[rf_name] = training_config[rf_name]['size']
+        
+        puts "size for #{rf_name}: #{@sizes[rf_name]['w']}x#{@sizes[rf_name]['h']}"
       else
-        throw "Error: #{fr}.rf not a forest present in the forest folder" unless File.exists?("#{fr}.rf")
+        throw "Error: #{fr} not a present or not a folder"
       end
-      
     end
   end
   
@@ -86,99 +92,125 @@ namespace :classify do
     (scale_min..scale_max).step(scale_step) do |step|
       @steps << step
     end
-    
     @original_images.each do |im| 
       im.destroy!
-    end
-    
+    end  
     @original_images = nil
-      
   end
+  
   
   desc ""
   task :classify => [:create_pyramid, :check_trees ] do
-    # MemoryProfiler.start
-    # require 'ruby-prof'
-    # RubyProf.measure_mode = RubyProf:::MEMORY
-    # RubyProf.start
     @results = ClassificationResults.new
     @pyramids.each do |filename, img_array|
       image_result = ImageResult.new(filename)
+      puts "analyzing #{filename}"
       while img_array.size > 0
-        img = img_array.shift
-        @forests.each do |full_forest|
-          forest = full_forest.split("/")[-1]
-          table_name = "#{@tables_folder}/#{forest}_classify.dat"
-          window_cols = @sizes[full_forest][x]
-          window_rows = @sizes[full_forest][y]
+        img = img_array.shift   
+        @forest_groups.each do |full_forest_group|
+          forest_group = full_forest_group.split('/')[-1]
+          puts "working with forest group #{forest_group}"
+          window_cols = @sizes[forest_group]['w']
+          window_rows = @sizes[forest_group]['h']
           window_step = CONFIG['window'] || 10
           puts "Windowing #{img.filename} - #{img.columns}x#{img.rows}"
           windower = ImageWindower.new(img, window_cols, window_rows, window_step)
-          
-          puts "Creating table: #{table_name}"
-          # RubyProf.start
-          rows, cols = windower.create_table(table_name)
-          # result = RubyProf.stop
-          puts "Table created with #{rows} rows and #{cols} columns"
-          # windower.write("#{File.dirname(__FILE__)}/../test/windows/window.jpg")
-          
-          puts "Writing R script for classification"
-          matrix_name = "classify_set"
-          output_name = "result"
-          output_file = "#{@tables_folder}/#{forest}_output.txt"
-          script = RScriptMaker.new("#{@scripts_folder}/#{forest}_classify.R")
-          script.library "randomForest"
-          script.load_matrix(matrix_name,table_name,rows,cols)
-          script.load "#{full_forest}.rf"
-          script.assign(output_name, "predict(#{forest}_rf, #{matrix_name})")
-          # script.command "#{output_name} <- predict(#{forest}_rf, #{matrix_name})"
-          script.save_matrix(output_name, output_file)
-          script.quit
-          script.close
-          
-          puts "Executing script: #{script.name}..."
-          gc = Thread.new {GC.start}
-          exe = Thread.new {  script.execute }
-          gc.join
-          exe.join
-          puts "done"
-          
-          puts "Reading results"        
-          r_reader = ResultReader.new(output_file)
-          # r_reader.print
-          
-          targets = r_reader.positives
-
-          # add boxes to matches in image
-          windower.add_boxes(targets)
-          img = windower.boxed_image
-          img.write "#{@tables_folder}/#{filename.split("/")[-1].split(".")[0]}_#{img.columns}x#{img.rows}_#{forest}.jpg"
-          
-          image_result.add_target(forest,windower.get_scaled_boxes)
-          
-          puts "original size: #{img.base_columns}x#{img.base_rows}"
-          
-          windower = nil
-          img.destroy!
-          img = nil
-          
-          
-          # printer = RubyProf::FlatPrinter.new(result)
-          # printer.print(File.new("result.txt","w"))
-          # printer = RubyProf::GraphHtmlPrinter.new(result)
-          # printer.print(File.new("result.html","w"))
-          
-        end #each forest
-      end 
-      @results.add(image_result)
+          # save to temp directory
+          puts "Saving to #{@temp_folder}"
+          image_name = "#{@temp_folder}/%d-#{forest_group}.jpg"
+          windower.write(@temp_folder)
+          # run r script
+          # get results
+          # store results
+        end
+      end
     end
-    
-    # result = RubyProf.stop
-    # printer = RubyProf::FlatPrinter.new(result)
-    # printer.print(File.new("memory.txt","w"))
-    # printer = RubyProf::GraphHtmlPrinter.new(result)
-    # printer.print(File.new("memory.html","w"))
   end
+    
+  # desc ""
+  # task :classify => [:create_pyramid, :check_trees ] do
+  #   # MemoryProfiler.start
+  #   # require 'ruby-prof'
+  #   # RubyProf.measure_mode = RubyProf:::MEMORY
+  #   # RubyProf.start
+  #   @results = ClassificationResults.new
+  #   @pyramids.each do |filename, img_array|
+  #     image_result = ImageResult.new(filename)
+  #     while img_array.size > 0
+  #       img = img_array.shift
+  #       @forests.each do |full_forest|
+  #         forest = full_forest.split("/")[-1]
+  #         table_name = "#{@tables_folder}/#{forest}_classify.dat"
+  #         window_cols = @sizes[full_forest][x]
+  #         window_rows = @sizes[full_forest][y]
+  #         window_step = CONFIG['window'] || 10
+  #         puts "Windowing #{img.filename} - #{img.columns}x#{img.rows}"
+  #         windower = ImageWindower.new(img, window_cols, window_rows, window_step)
+  #         
+  #         puts "Creating table: #{table_name}"
+  #         # RubyProf.start
+  #         rows, cols = windower.create_table(table_name)
+  #         # result = RubyProf.stop
+  #         puts "Table created with #{rows} rows and #{cols} columns"
+  #         # windower.write("#{File.dirname(__FILE__)}/../test/windows/window.jpg")
+  #         
+  #         puts "Writing R script for classification"
+  #         matrix_name = "classify_set"
+  #         output_name = "result"
+  #         output_file = "#{@tables_folder}/#{forest}_output.txt"
+  #         script = RScriptMaker.new("#{@scripts_folder}/#{forest}_classify.R")
+  #         script.library "randomForest"
+  #         script.load_matrix(matrix_name,table_name,rows,cols)
+  #         script.load "#{full_forest}.rf"
+  #         script.assign(output_name, "predict(#{forest}_rf, #{matrix_name})")
+  #         # script.command "#{output_name} <- predict(#{forest}_rf, #{matrix_name})"
+  #         script.save_matrix(output_name, output_file)
+  #         script.quit
+  #         script.close
+  #         
+  #         puts "Executing script: #{script.name}..."
+  #         gc = Thread.new {GC.start}
+  #         exe = Thread.new {  script.execute }
+  #         gc.join
+  #         exe.join
+  #         puts "done"
+  #         
+  #         puts "Reading results"        
+  #         r_reader = ResultReader.new(output_file)
+  #         # r_reader.print
+  #         
+  #         targets = r_reader.positives
+  # 
+  #         # add boxes to matches in image
+  #         windower.add_boxes(targets)
+  #         img = windower.boxed_image
+  #         img.write "#{@tables_folder}/#{filename.split("/")[-1].split(".")[0]}_#{img.columns}x#{img.rows}_#{forest}.jpg"
+  #         
+  #         image_result.add_target(forest,windower.get_scaled_boxes)
+  #         
+  #         puts "original size: #{img.base_columns}x#{img.base_rows}"
+  #         
+  #         windower = nil
+  #         img.destroy!
+  #         img = nil
+  #         
+  #         
+  #         # printer = RubyProf::FlatPrinter.new(result)
+  #         # printer.print(File.new("result.txt","w"))
+  #         # printer = RubyProf::GraphHtmlPrinter.new(result)
+  #         # printer.print(File.new("result.html","w"))
+  #         
+  #       end #each forest
+  #     end 
+  #     @results.add(image_result)
+  #   end
+  #   
+  #   # result = RubyProf.stop
+  #   # printer = RubyProf::FlatPrinter.new(result)
+  #   # printer.print(File.new("memory.txt","w"))
+  #   # printer = RubyProf::GraphHtmlPrinter.new(result)
+  #   # printer.print(File.new("memory.html","w"))
+  # end
   
   desc "link up the tasks and run this thing"
   task :samples => [:set_options, :load_images, :check_trees, :resize, :create_pyramid, :classify]
