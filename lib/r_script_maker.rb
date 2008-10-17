@@ -39,8 +39,13 @@ class RScriptMaker
     @script << command.to_s+"\n"
   end
   
+  # uses source to run another r script
+  def run(r_file)
+    @script << "source(\'#{r_file}\')\n"
+  end
+  
   def execute
-    `r CMD BATCH #{File.expand_path(@name)} #{File.expand_path(@name)}out`
+    `r CMD BATCH #{File.expand_path(@name)} #{File.expand_path(@name)}out.txt`
   end
   
   def quit

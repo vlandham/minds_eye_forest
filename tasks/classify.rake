@@ -5,10 +5,10 @@ namespace :classify do
     puts "Reading configuration for classify"
     CONFIG = YAML.load_file("#{File.dirname(__FILE__)}/../config/classify.yml")
     
-    throw "Error: no tables folder" unless CONFIG["tables"]
-    puts "creating directory structure for : #{CONFIG['tables']}"
-    mkdir_p CONFIG['tables']
-    @tables_folder = CONFIG['tables']
+    throw "Error: no results folder" unless CONFIG["results"]
+    puts "creating directory structure for : #{CONFIG['results']}"
+    mkdir_p CONFIG['results']
+    @results_folder = CONFIG['results']
     
     # samples is just a filename for now - should make it a list, or better, recurse through
     throw "Error: no sample folder" unless CONFIG["samples"]
@@ -22,8 +22,7 @@ namespace :classify do
     
     throw "Error: no temp directory" unless CONFIG['temp']
     @temp_folder = CONFIG['temp']
-    puts "creating directory structure for temp folder: #{@temp_folder}"
-    mkdir_p @temp_folder
+    
   end
   
   desc "loads images from samples folder"
@@ -116,10 +115,26 @@ namespace :classify do
           puts "Windowing #{img.filename} - #{img.columns}x#{img.rows}"
           windower = ImageWindower.new(img, window_cols, window_rows, window_step)
           # save to temp directory
+          puts "removing #{@temp_folder}"
+          rm_rf(@temp_folder)
           puts "Saving to #{@temp_folder}"
-          image_name = "#{@temp_folder}/%d-#{forest_group}.jpg"
+          mkdir_p @temp_folder
+          image_name = "#{@temp_folder}/%010d-#{forest_group}.jpg"
           windower.write(image_name)
           # run r script
+          helper_script = File.expand_path(File.dirname(__FILE__)+"/../R/classify.R")
+          full_temp_folder = File.expand_path(File.dirname(__FILE__)+"/../"+@temp_folder)
+          forest_group_full_path = File.expand_path(full_forest_group)
+
+          script = RScriptMaker.new("#{@scripts_folder}/#{forest_group}_classify.R")
+          script.assign("images_folder", "\'#{full_temp_folder}\'")
+          script.assign("forests_folder", "\'#{forest_group_full_path}\'")
+          script.assign("r_directory", File.expand_path(File.dirname(__FILE__)+"/../R/")
+          script.run(helper_script)
+          script.quit
+          script.close
+          puts "Executing script: #{script.name}..."
+          script.execute 
           # get results
           # store results
         end

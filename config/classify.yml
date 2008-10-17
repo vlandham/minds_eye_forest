@@ -2,7 +2,7 @@ samples: samples/test
 forests: 
   - output/head/forests/head
 
-tables: output/datasets
+results: output/results
 script: output/scripts
 temp: output/temp/head
 scale:
