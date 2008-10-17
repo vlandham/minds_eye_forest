@@ -55,7 +55,7 @@ class Window
   def to_a
     # puts "getting #{@width} by #{@height} from #{@image.inspect}"
     temp= @image.get_pixels(@box.x,@box.y,@box.width,@box.height)
-    # puts temp.length.to_s
+    # puts temp.inspect
     temp
   end
   
@@ -67,6 +67,7 @@ class Window
   
   def window
     img = Image.new(@box.width,@box.height)
+    # puts "x: #{@box.x} -- #{@box.x+@box.width}, y:#{@box.y} --- #{@box.y+@box.height}"
     img.store_pixels(0,0,@box.width,@box.height,self.to_a)
     img
   end
@@ -127,9 +128,9 @@ class ImageWindower
         # vector_array << vec
         file_string << "#{vec.to_int_s_quick}\n"
         tot_rows += 1
-        wi.destroy!
-        wi = nil
-        vec = nil
+        #wi.destroy!
+        #wi = nil
+        #vec = nil
       end #each window
       # s = vector_array.to_matrix
     File.open(table_name,'w') do |f|

@@ -118,7 +118,7 @@ namespace :classify do
           # save to temp directory
           puts "Saving to #{@temp_folder}"
           image_name = "#{@temp_folder}/%d-#{forest_group}.jpg"
-          windower.write(@temp_folder)
+          windower.write(image_name)
           # run r script
           # get results
           # store results
