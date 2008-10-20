@@ -101,6 +101,7 @@ namespace :classify do
   desc ""
   task :classify => [:create_pyramid, :check_trees ] do
     base_image_name = "%010d.jpg"
+    helper_script = File.expand_path(File.dirname(__FILE__)+"/../R/classify.R")
     @results = ClassificationResults.new
     @pyramids.each do |filename, img_array|
       image_result = ImageResult.new(filename)
@@ -122,8 +123,7 @@ namespace :classify do
           mkdir_p @temp_folder
           image_name = "#{@temp_folder}/#{base_image_name}"
           windower.write(image_name)
-          # run r script
-          helper_script = File.expand_path(File.dirname(__FILE__)+"/../R/classify.R")
+          # run r script       
           full_temp_folder = File.expand_path(File.dirname(__FILE__)+"/../"+@temp_folder)
           forest_group_full_path = File.expand_path(full_forest_group)
 

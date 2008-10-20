@@ -7,6 +7,7 @@ head:
     samples/head/out/negative: head_negative
   images: output/temp/head_training
   script: output/scripts
+  forests: output/head/forests/head
   trees: 100
 
 
