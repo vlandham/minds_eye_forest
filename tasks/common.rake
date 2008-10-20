@@ -19,6 +19,33 @@ namespace :common do
     end
   end
   
+  desc "saves images to temporary directory"
+  task :save_images do
+    # need images and training folder
+    throw "no images folder or training folder" unless @images_folder and @type_folder
+    base_image_name = "%010d.jpg"
+    photos = ImageList.new
+    types = Array.new
+    @samples.each do |folder_name, target_type|
+      if File.directory?(folder_name)
+        puts "Assigning #{folder_name} to type #{target_type}"
+        photo_files = FileList["#{folder_name}/*.jpg","#{folder_name}/*.png"]
+        photos.read(*photo_files)
+        photo_files.length.times {types << target_type}
+      else
+        puts "Error: not a valid input folder - #{folder_name}"
+      end
+    end
+    
+    puts "writing images to #{@images_folder}"
+    photos.write("#{@images_folder}/#{base_image_name}")
+    @type_file = File.expand_path(@type_folder)+"/types.dat"
+    puts "writing results to #{@type_file}"
+    File.open(@type_file,'w') do |f|
+      types.each {|t| f << t+"\n"}
+    end
+  end
+  
   desc "vectorizes the image data into one long vector."
   task :vectorize => :get_images do
     puts "vectorizing images..."

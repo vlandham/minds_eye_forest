@@ -5,9 +5,8 @@ head:
     samples/head/out/most_face_side: head_most_face_side
     samples/head/out/some_face: head_some_face
     samples/head/out/negative: head_negative
-  tables: output/head/datasets
-  script: output/head/scripts
-  forest: output/head/forests/head
+  images: output/temp/head_training
+  script: output/scripts
   trees: 100
 
 

@@ -1,7 +1,7 @@
 namespace :train do
   
   desc "Chains the processing steps together to create a dataset from folders of images and train the RF"
-  task :rf => [:set_options, 'common:create_tables', :run_r_script]
+  task :rf => [:set_options, 'common:save_images', :run_r]
   
   desc "Sets where the folder of images to preprocess is, destination and preprocessing requirements"
   task :set_options do
@@ -9,23 +9,37 @@ namespace :train do
     CONFIG = YAML.load_file("#{File.dirname(__FILE__)}/../config/train.yml")[GROUP]
     throw "Error: no samples folder" unless CONFIG["samples"]  
     # create directory for the training datasets
-    throw "Error: no tables folder" unless CONFIG["tables"]
-    puts "creating directory structure for : #{CONFIG['tables']}"
-    mkdir_p CONFIG['tables']
+    throw "Error: no temp folder" unless CONFIG["images"]
+    @images_folder = CONFIG['images']
+    puts "removing #{@temp_folder}"
+    rm_rf(@images_folder)
+    puts "creating directory structure for : #{@temp_folder}"
+    mkdir_p @images_folder
     # samples is a hash with folder/name => classification_type
+    throw "Error: no samples folder" unless CONFIG["samples"]
     @samples = CONFIG["samples"]
+    throw "Error: no script folder given" unless CONFIG["script"] and File.directory?(CONFIG["script"])
+    @script_folder = CONFIG['script']
+    @type_folder = CONFIG['types'] || @script_folder
+    
+  end
+  
+  desc "Runs the R script, passing in the necessary variables"
+  task :run_r => 'common:save_images' do
+   script_name = "#{@script_folder}/#{GROUP}_train.R"
+   puts "Creating script: #{script_name}"
   end
   
   desc "write the R script to train with this dataset"
   task :run_r_script => 'common:create_tables' do
-    script_folder = CONFIG['script'] || "scripts"
-    tree_folder = CONFIG['forest'] || "forests"
-    forest_name = CONFIG['name'] || GROUP
-    puts "Creating script folder if necessary: #{script_folder}"
-    mkdir_p script_folder
-    mkdir_p tree_folder
-    @script_name = "#{script_folder}/#{forest_name}_train.R"
-    puts "Creating script: #{@script_name}"
+    # script_folder = CONFIG['script'] || "scripts"
+    # tree_folder = CONFIG['forest'] || "forests"
+    # forest_name = CONFIG['name'] || GROUP
+    # puts "Creating script folder if necessary: #{script_folder}"
+    # mkdir_p script_folder
+    # mkdir_p tree_folder
+    # @script_name = "#{script_folder}/#{forest_name}_train.R"
+    # puts "Creating script: #{@script_name}"
     
     # if # of tress or # of attributes to look at are given, set that up here.
     tree_string = CONFIG['trees'] ? ", ntree=#{CONFIG['trees']}" :  ", ntree=100"

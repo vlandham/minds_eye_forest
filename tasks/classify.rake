@@ -100,6 +100,7 @@ namespace :classify do
   
   desc ""
   task :classify => [:create_pyramid, :check_trees ] do
+    base_image_name = "%010d.jpg"
     @results = ClassificationResults.new
     @pyramids.each do |filename, img_array|
       image_result = ImageResult.new(filename)
@@ -119,7 +120,7 @@ namespace :classify do
           rm_rf(@temp_folder)
           puts "Saving to #{@temp_folder}"
           mkdir_p @temp_folder
-          image_name = "#{@temp_folder}/%010d-#{forest_group}.jpg"
+          image_name = "#{@temp_folder}/#{base_image_name}"
           windower.write(image_name)
           # run r script
           helper_script = File.expand_path(File.dirname(__FILE__)+"/../R/classify.R")
@@ -129,13 +130,15 @@ namespace :classify do
           script = RScriptMaker.new("#{@scripts_folder}/#{forest_group}_classify.R")
           script.assign("images_folder", "\'#{full_temp_folder}\'")
           script.assign("forests_folder", "\'#{forest_group_full_path}\'")
-          script.assign("r_directory", File.expand_path(File.dirname(__FILE__)+"/../R/")
+          script.assign("r_directory", File.expand_path(File.dirname(__FILE__)+"/../R/"))
           script.run(helper_script)
           script.quit
           script.close
           puts "Executing script: #{script.name}..."
           script.execute 
           # get results
+          # r_reader = ResultReader.new(output_file)
+          # targets = r_reader.positives
           # store results
         end
       end
