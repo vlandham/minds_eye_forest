@@ -39,6 +39,7 @@ namespace :common do
     
     puts "writing images to #{@images_folder}"
     photos.write("#{@images_folder}/#{base_image_name}")
+    photos.each {|photo| photo.destroy!}
     @type_file = File.expand_path(@type_folder)+"/types.dat"
     puts "writing results to #{@type_file}"
     File.open(@type_file,'w') do |f|

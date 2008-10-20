@@ -2,10 +2,10 @@ head:
   samples:
     samples/head/test/all_face: head_all_face
     samples/head/test/negative: head_negative
-  pixel_info: I
-  tables: output/head/datasets
-  script: output/head/scripts
-  forest: output/head/forests
+  images: output/temp/head_testing
+  script: output/scripts
+  forests: output/forests/head
+  type: output/results
 
 body1:
   samples:

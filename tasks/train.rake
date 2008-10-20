@@ -11,6 +11,8 @@ namespace :train do
     @samples = CONFIG["samples"]
     throw "Error: no forests folder" unless CONFIG["forests"]  
     @forests_folder = CONFIG['forests']
+    puts "creating directory structure for : #{@forests_folder}"
+    mkdir_p @forests_folder
     # create directory for the training datasets
     throw "Error: no temp folder" unless CONFIG["images"]
     @images_folder = CONFIG['images']
