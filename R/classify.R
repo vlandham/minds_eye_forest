@@ -15,7 +15,7 @@ source('possible_forests.R')
 source('get_images.R')
 # actually loads all the forest objects
 source('get_forests.R')
-
+image_names <- dir(images_folder, pattern='.*.jpg')
 images <- get_images(images_folder)
 
 
@@ -45,8 +45,9 @@ for (possible_rf in possible_rfs)
     
     # classify the features using the rf
     results <- predict(rf,features,type="vote", norm.votes=TRUE)
+    results <- cbind(image_names, results) #put filenames in 
     # save results
-    results_file <- paste(results_folder, "/", possible_rf,"_out.txt",sep="")
+    results_file <- paste(results_folder, "/", possible_rf,"_out.txt",sep="")    
     write.table(results, file=results_file)
   }
 }
