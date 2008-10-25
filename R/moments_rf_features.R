@@ -1,4 +1,4 @@
-momement_rf_features <- function(images)
+moments_rf_features <- function(images)
 {
   # get grayscale version of the images
   gray_images <- channel(images, 'gray')
@@ -9,5 +9,7 @@ momement_rf_features <- function(images)
   m1 <- moments(gray_images)
   m2 <- moments(edge_gray_images)
   
-  image_moments = c(m1,m2)
+  # image_moments = c(m1,m2)
+  image_moments = m1
+  image_moments
 }

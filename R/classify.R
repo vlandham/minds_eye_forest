@@ -2,7 +2,7 @@
 #   images_folder -- contains the name of folder of images we're going to classify
 #   forests_folder -- contains the name of the folder containing the group of forests we're going to use
 #   r_directory -- the base folder for the R scripts used in this script
-#   results_folder --  directory to store the results for the classification
+#   results_file --  file to store the results for the classification
 
 print(results_folder)
 # print(forests_folder)
@@ -31,6 +31,7 @@ for (possible_rf in possible_rfs)
   # if this rf exists in our workspace
   if(exists(possible_rf))
   {
+    print(paste("found forest:", possible_rf))
     # acquire the actual rf (possible_rf is just a string)
     # rf is the actual forest data structure
     rf <- get(possible_rf)
@@ -40,10 +41,10 @@ for (possible_rf in possible_rfs)
     source(feature_file)
     # evaluate the feature function, passing in the images
     command <- paste('features <- ',feature_function,'(images)',sep="")
-    result <- texteval(command,"\n")
-    cat(result)
+    eval(parse(text = command)) 
+    
     # classify the features using the rf
-    results <- predict(rf,features,type="votes", norm.votes=TRUE)
+    results <- predict(rf,features,type="vote", norm.votes=TRUE)
     # save results
     results_file <- paste(results_folder, "/", possible_rf,"_out.txt",sep="")
     write.table(results, file=results_file)

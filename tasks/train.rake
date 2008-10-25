@@ -40,7 +40,8 @@ namespace :train do
    script.assign("images_folder", "\'#{full_images_folder}\'")
    script.assign("forests_folder", "\'#{forest_group_full_path}\'")
    script.assign("r_directory", "\'#{File.expand_path(File.dirname(__FILE__)+"/../R/")}\'")
-   script.assign("types", "\'#{@type_file}\'")
+   script.assign("classifications_file", "\'#{@type_file}\'")
+   script.assign("classifications_size", @type_size)
    script.run(helper_script)
    script.quit
    script.close

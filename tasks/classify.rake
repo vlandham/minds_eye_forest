@@ -102,6 +102,7 @@ namespace :classify do
   task :classify => [:create_pyramid, :check_trees ] do
     base_image_name = "%010d.jpg"
     helper_script = File.expand_path(File.dirname(__FILE__)+"/../R/classify.R")
+    # results_file = "#{@results_folder}/#{GROUP}.txt"
     @results = ClassificationResults.new
     @pyramids.each do |filename, img_array|
       image_result = ImageResult.new(filename)
@@ -131,7 +132,7 @@ namespace :classify do
           script.assign("images_folder", "\'#{full_temp_folder}\'")
           script.assign("forests_folder", "\'#{forest_group_full_path}\'")
           script.assign("results_folder", "\'#{@results_folder}\'")
-          script.assign("r_directory", File.expand_path(File.dirname(__FILE__)+"/../R/"))
+          script.assign("r_directory", "\'#{File.expand_path(File.dirname(__FILE__)+"/../R/")}\'")
           script.run(helper_script)
           script.quit
           script.close

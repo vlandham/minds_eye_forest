@@ -1,6 +1,6 @@
 samples: samples/test
 forests: 
-  - output/head/forests/head
+  - output/forests/head
 
 results: output/results
 script: output/scripts
