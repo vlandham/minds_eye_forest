@@ -2,31 +2,28 @@
 #   images_folder -- contains the name of folder of images we're going to classify
 #   forests_folder -- contains the name of the folder containing the group of forests we're going to use
 #   r_directory -- the base folder for the R scripts used in this script
+#   results_folder --  directory to store the results for the classification
 
-# print(images_folder)
+print(results_folder)
 # print(forests_folder)
 
 setwd(r_directory)
 
 library('randomForest')
-# library('EBImage')
-
-image_names <- dir(images_folder, pattern='.*.jpg')
-image_name <- image_names[1]
-
-# read all the images from the folder into the stack of images - images
-# images <- readImage(paste(images_folder, image_names, sep="/"),colormode=TrueColor)
-# gray_images <- readImage(paste(images_folder, image_names, sep="/"))
-
-forest_names <- dir(forests_folder, pattern='.*.rf')
-forests <- paste(forests_folder, forest_names,sep="/")
-print(forests)
-load(file=forests)
-
-
+library('EBImage')
 source('possible_forests.R')
+source('get_images.R')
+# actually loads all the forest objects
+source('get_forests.R')
+
+images <- get_images(images_folder)
+
 
 # loop through all possibly trained rfs
+# if a rf is present, then we will use it to
+# call the appropriate function for preprocessing the 
+# images for it, and then classify the image using
+# that forest.
 possible_rfs <- possible_forests()
 for (possible_rf in possible_rfs)
 {
@@ -35,11 +32,20 @@ for (possible_rf in possible_rfs)
   if(exists(possible_rf))
   {
     # acquire the actual rf (possible_rf is just a string)
+    # rf is the actual forest data structure
     rf <- get(possible_rf)
     # build a name for the function to call
     feature_function <- paste(possible_rf,"features",sep="_")
     feature_file <- paste(feature_function,"R",sep=".")
     source(feature_file)
     # evaluate the feature function, passing in the images
+    command <- paste('features <- ',feature_function,'(images)',sep="")
+    result <- texteval(command,"\n")
+    cat(result)
+    # classify the features using the rf
+    results <- predict(rf,features,type="votes", norm.votes=TRUE)
+    # save results
+    results_file <- paste(results_folder, "/", possible_rf,"_out.txt",sep="")
+    write.table(results, file=results_file)
   }
 }

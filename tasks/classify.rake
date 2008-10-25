@@ -8,7 +8,7 @@ namespace :classify do
     throw "Error: no results folder" unless CONFIG["results"]
     puts "creating directory structure for : #{CONFIG['results']}"
     mkdir_p CONFIG['results']
-    @results_folder = CONFIG['results']
+    @results_folder = File.expand_path(CONFIG['results'])
     
     # samples is just a filename for now - should make it a list, or better, recurse through
     throw "Error: no sample folder" unless CONFIG["samples"]
@@ -130,6 +130,7 @@ namespace :classify do
           script = RScriptMaker.new("#{@scripts_folder}/#{forest_group}_classify.R")
           script.assign("images_folder", "\'#{full_temp_folder}\'")
           script.assign("forests_folder", "\'#{forest_group_full_path}\'")
+          script.assign("results_folder", "\'#{@results_folder}\'")
           script.assign("r_directory", File.expand_path(File.dirname(__FILE__)+"/../R/"))
           script.run(helper_script)
           script.quit
