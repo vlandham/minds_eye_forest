@@ -15,6 +15,7 @@ source('possible_forests.R')
 source('get_images.R')
 # actually loads all the forest objects
 source('get_forests.R')
+
 image_names <- dir(images_folder, pattern='.*.jpg')
 images <- get_images(images_folder)
 
