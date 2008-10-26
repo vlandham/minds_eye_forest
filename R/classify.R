@@ -49,6 +49,6 @@ for (possible_rf in possible_rfs)
     results <- cbind(image_names, results) #put filenames in 
     # save results
     results_file <- paste(results_folder, "/", possible_rf,"_out.txt",sep="")    
-    write.table(results, file=results_file)
+    write.table(results, file=results_file, sep=",", row.names=FALSE,quote=c(1), na="nil")
   }
 }

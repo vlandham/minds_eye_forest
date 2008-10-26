@@ -139,8 +139,9 @@ namespace :classify do
           puts "Executing script: #{script.name}..."
           script.execute 
           # get results
-          # r_reader = ResultReader.new(output_file)
-          # targets = r_reader.positives
+          puts "Reading results"
+          r_reader = ResultReader.new(@results_folder)
+          targets = r_reader.positives
           # store results
         end
       end
