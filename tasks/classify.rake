@@ -124,6 +124,8 @@ namespace :classify do
           mkdir_p @temp_folder
           image_name = "#{@temp_folder}/#{base_image_name}"
           windower.write(image_name)
+          result_image_name = img.filename.split("/")[-1].split(".")[0]
+
           # run r script       
           full_temp_folder = File.expand_path(File.dirname(__FILE__)+"/../"+@temp_folder)
           forest_group_full_path = File.expand_path(full_forest_group)
@@ -137,11 +139,19 @@ namespace :classify do
           script.quit
           script.close
           puts "Executing script: #{script.name}..."
-          script.execute 
+          threads = []
+          threads << Thread.new {GC.start}
+          threads << Thread.new {script.execute}
+          threads.each  {|t| t.join }
           # get results
           puts "Reading results"
           r_reader = ResultReader.new(@results_folder)
           targets = r_reader.positives
+          windower.add_boxes(targets)
+          b_img = windower.boxed_image
+          b_img.write "#{@results_folder}/#{result_image_name}_#{b_img.columns}x#{b_img.rows}_#{GROUP}.jpg"
+          b_img.destroy!
+          img.destroy!
           # store results
         end
       end

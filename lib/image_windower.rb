@@ -114,37 +114,42 @@ class ImageWindower
     imgs = ImageList.new
     wind_img.each {|wi| imgs << wi}
     imgs.write(filename)
+    imgs.each {|img| img.destroy!}
   end
   
-  def create_table(table_name)
-    tot_rows = 0
-    tot_cols = nil
-    file_string = ""
-    # vector_array = Array.new
-      @windows.each do |win|
-        wi = win.window
-        vec = FeatureExtractor.convert(wi)
-        tot_cols ||= vec.size
-        # vector_array << vec
-        file_string << "#{vec.to_int_s_quick}\n"
-        tot_rows += 1
-        #wi.destroy!
-        #wi = nil
-        #vec = nil
-      end #each window
-      # s = vector_array.to_matrix
-    File.open(table_name,'w') do |f|
-      # f << s
-      f << file_string
-    end #file
-
-    s = nil
-    vector_array = nil
-
-    [tot_rows,tot_cols]
-  end
+  # def create_table(table_name)
+  #   tot_rows = 0
+  #   tot_cols = nil
+  #   file_string = ""
+  #   # vector_array = Array.new
+  #     @windows.each do |win|
+  #       wi = win.window
+  #       vec = FeatureExtractor.convert(wi)
+  #       tot_cols ||= vec.size
+  #       # vector_array << vec
+  #       file_string << "#{vec.to_int_s_quick}\n"
+  #       tot_rows += 1
+  #       #wi.destroy!
+  #       #wi = nil
+  #       #vec = nil
+  #     end #each window
+  #     # s = vector_array.to_matrix
+  #   File.open(table_name,'w') do |f|
+  #     # f << s
+  #     f << file_string
+  #   end #file
+  # 
+  #   s = nil
+  #   vector_array = nil
+  # 
+  #   [tot_rows,tot_cols]
+  # end
   
-  def add_boxes(indices)
+  def add_boxes(filenames)
+    indices = filenames.map do |filename|
+      filename.split(".")[0].to_i
+    end
+    puts indices.inspect
     # lazy boxing
     @box_indices = indices
   end
