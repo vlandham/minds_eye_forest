@@ -102,6 +102,9 @@ namespace :classify do
   task :classify => [:create_pyramid, :check_trees ] do
     base_image_name = "%010d.jpg"
     helper_script = File.expand_path(File.dirname(__FILE__)+"/../R/classify.R")
+    
+    result_images_folder = File.expand_path("#{@temp_folder}_results")
+    mkdir_p result_images_folder
     # results_file = "#{@results_folder}/#{GROUP}.txt"
     @results = ClassificationResults.new
     @pyramids.each do |filename, img_array|
@@ -119,9 +122,9 @@ namespace :classify do
           windower = ImageWindower.new(img, window_cols, window_rows, window_step)
           # save to temp directory
           puts "removing #{@temp_folder}"
-          rm_rf(@temp_folder)
-          puts "Saving to #{@temp_folder}"
+          rm_rf(@temp_folder)          
           mkdir_p @temp_folder
+          puts "Saving to #{@temp_folder}"
           image_name = "#{@temp_folder}/#{base_image_name}"
           windower.write(image_name)
           result_image_name = img.filename.split("/")[-1].split(".")[0]
@@ -143,15 +146,21 @@ namespace :classify do
           threads << Thread.new {GC.start}
           threads << Thread.new {script.execute}
           threads.each  {|t| t.join }
+          # ----------------------------
           # get results
           puts "Reading results"
           r_reader = ResultReader.new(@results_folder)
           targets = r_reader.positives
           windower.add_boxes(targets)
+          
           b_img = windower.boxed_image
-          b_img.write "#{@results_folder}/#{result_image_name}_#{b_img.columns}x#{b_img.rows}_#{GROUP}.jpg"
+          result_images_full_name = "#{result_image_name}_#{b_img.columns}x#{b_img.rows}_#{GROUP}.jpg"
+          b_img.write "#{result_images_folder}/#{result_images_full_name}"
           b_img.destroy!
           img.destroy!
+          cp_r @results_folder, "#{result_images_folder}/#{result_images_full_name.split(".")[0]}/"
+          rm_rf @results_folder
+          mkdir_p @results_folder
           # store results
         end
       end

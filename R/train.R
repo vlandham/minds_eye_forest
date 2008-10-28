@@ -15,9 +15,11 @@ library('EBImage')
 source('get_images.R')
 source('possible_forests.R')
 source('get_classifications.R')
+source('to_data_array.R')
 
 classes <- get_classifications(classifications_file,classifications_size)
 images <- get_images(images_folder)
+gray_images <- channel(images, 'gray')
 
 # for each of the possible forests to create
 #  if the function to extract features for that
@@ -36,12 +38,16 @@ for (rf_name in rf_names)
      print(rf_name)
      source(feature_file)
      # evaluate the feature function, passing in the images
-     command <- paste('features <- ',feature_function,'(images)',sep="")
+     command <- paste('features <- ',feature_function,'(images,gray_images)',sep="")
      eval(parse(text = command)) 
+     print('training random forest')
+     print(paste('features size:', dim(features)))
+     print(paste('training set size:',dim(classes),length(classes)))
      # create new rf with correct name, train it with features & classes
      assign(rf_name, randomForest(features, classes, ntree=100))
      # save rf to the correct file
      rf_file <- paste(forests_folder,"/",rf_name,".rf",sep="")
+     print(paste('saving random forest to:',rf_file))
      # rf <- get(rf_name)
      # print(rf_file)
      save(list=as.character(rf_name), file=rf_file)

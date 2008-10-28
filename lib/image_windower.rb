@@ -149,7 +149,7 @@ class ImageWindower
     indices = filenames.map do |filename|
       filename.split(".")[0].to_i
     end
-    puts indices.inspect
+    # puts indices.inspect
     # lazy boxing
     @box_indices = indices
   end

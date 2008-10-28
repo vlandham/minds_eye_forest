@@ -10,7 +10,7 @@ class ResultReader
   end
   
   def positives
-    threshold = 0.5
+    threshold = 0.8
     pos = @results.select {|k,v| v[:pos] > v[:neg] and v[:pos] > threshold}
     pos.map! {|pos_array| pos_array[0]}
     pos.sort
