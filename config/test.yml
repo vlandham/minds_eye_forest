@@ -1,11 +1,12 @@
 head:
   samples:
-    samples/head/test/all_face: head_all_face
-    samples/head/test/negative: head_negative
+    samples/head_test/all_face: head_all_face
+    samples/head_test/negative: head_negative
   images: output/temp/head_testing
   script: output/scripts
   forests: output/forests/head
-  type: output/results
+  results: output/test/results
+  types: output/test/results
 
 body1:
   samples:
