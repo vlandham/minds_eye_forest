@@ -4,22 +4,13 @@
 #   r_directory -- the base folder for the R scripts used in this script
 #   classifications_file -- the file containing the actual classifications of our images
 #   classifications_size -- size of the types vector to import
-
-# print(images_folder)
-print(forests_folder)
-
 setwd(r_directory)
-
-library('randomForest')
-library('EBImage')
-source('get_images.R')
-source('possible_forests.R')
+# print(images_folder)
+# print(forests_folder)
+source('startup.R')
 source('get_classifications.R')
-source('to_data_array.R')
 
 classes <- get_classifications(classifications_file,classifications_size)
-images <- get_images(images_folder)
-gray_images <- channel(images, 'gray')
 
 # for each of the possible forests to create
 #  if the function to extract features for that

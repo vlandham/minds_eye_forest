@@ -3,25 +3,11 @@
 #   forests_folder -- contains the name of the folder containing the group of forests we're going to use
 #   r_directory -- the base folder for the R scripts used in this script
 #   results_file --  file to store the results for the classification
-
-print(results_folder)
-# print(forests_folder)
-
 setwd(r_directory)
-
-library('randomForest')
-library('EBImage')
-source('possible_forests.R')
-source('get_images.R')
-# actually loads all the forest objects
+# print(results_folder)
+# print(forests_folder)
+source('startup.R')
 source('get_forests.R')
-source('to_data_array.R')
-
-image_names <- dir(images_folder, pattern='.*.jpg')
-images <- get_images(images_folder)
-
-# get grayscale version of the images
-gray_images <- channel(images, 'gray')
 
 # loop through all possibly trained rfs
 # if a rf is present, then we will use it to

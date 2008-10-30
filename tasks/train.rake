@@ -35,6 +35,9 @@ namespace :train do
    helper_script = File.expand_path(File.dirname(__FILE__)+"/../R/train.R")
    full_images_folder = File.expand_path(File.dirname(__FILE__)+"/../"+@images_folder)
    forest_group_full_path = File.expand_path(@forests_folder)
+   
+   rm_rf forest_group_full_path
+   mkdir_p forest_group_full_path
 
    script = RScriptMaker.new(script_name)
    script.assign("images_folder", "\'#{full_images_folder}\'")

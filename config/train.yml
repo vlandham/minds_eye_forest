@@ -1,10 +1,10 @@
 head:
   samples:
-    samples/head/out/all_face: head_all_face
-    samples/head/out/most_face_front: head_most_face_front
-    samples/head/out/most_face_side: head_most_face_side
-    samples/head/out/some_face: head_some_face
-    samples/head/out/negative: head_negative
+    samples/head_out/all_face: head_all_face
+    samples/head_out/most_face_front: head_most_face_front
+    samples/head_out/most_face_side: head_most_face_side
+    samples/head_out/some_face: head_some_face
+    samples/head_out/negative: head_negative
   images: output/temp/head_training
   script: output/scripts
   forests: output/forests/head

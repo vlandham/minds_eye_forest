@@ -31,8 +31,8 @@ namespace :pre do
     CONFIG['folders'].each do |folder|
       photo_list = @photos[folder['name']]
       output_dir = folder['output_dir']
-      remove_dir(output_dir) if File.directory?(output_dir)
-      mkdir(output_dir)
+      rm_rf(output_dir) if File.directory?(output_dir)
+      mkdir_p(output_dir)
       
       file_name = output_dir+"/"+@append.join('_')+".jpg"
       puts "Creating modified images: #{file_name}"
@@ -52,7 +52,7 @@ namespace :pre do
     w = CONFIG['size']['w']
     h = CONFIG['size']['h']
     @photos.each do |name,photo_list|
-      puts photo_list.inspect
+      # puts photo_list.inspect
       photo_list.each do |photo|
         photo.resize!(w,h)
       end

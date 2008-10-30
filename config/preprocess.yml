@@ -2,19 +2,19 @@ head:
   folders:
     - name: head_all_face
       input_dir: samples/head/all_face
-      output_dir: samples/head/out/all_face
+      output_dir: samples/head_out/all_face
     - name: head_most_face_front
       input_dir: samples/head/most_face_front
-      output_dir: samples/head/out/most_face_front
+      output_dir: samples/head_out/most_face_front
     - name: head_most_face_side
       input_dir: samples/head/most_face_side
-      output_dir: samples/head/out/most_face_side
+      output_dir: samples/head_out/most_face_side
     - name: head_some_face
       input_dir: samples/head/some_face
-      output_dir: samples/head/out/some_face
+      output_dir: samples/head_out/some_face
     - name: head_negative
       input_dir: samples/head/negative
-      output_dir: samples/head/out/negative
+      output_dir: samples/head_out/negative
   size:
     w: 60
     h: 70
